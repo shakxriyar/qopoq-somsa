@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cukur Burger | Premium</title>
+    <style>
+        :root {
+            --bg: #171717; --text: #d1cdcd; --accent: #ff00cc; 
+            --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1);
+        }
+        .light { --bg: #ccc6c6; --text: #1a1a1a; --glass: rgba(0, 0, 0, 0.05); --border: rgba(0, 0, 0, 0.1); }
+
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: 0.4s; overflow-x: hidden; scroll-behavior: smooth; }
+
+        /* NAVBAR */
+        .navbar { 
+            position: fixed; top: 0; width: 100%; height: 70px; 
+            display: flex; align-items: center; justify-content: space-between; 
+            padding: 0 5%; background: transparent; backdrop-filter: blur(15px); 
+            border-bottom: 1px solid var(--border); z-index: 2000; box-sizing: border-box; 
+        }
+        .logo { font-weight: 900; font-size: 1.5rem; color: var(--accent); letter-spacing: 2px; }
+        
+        .search-input { 
+            background: var(--glass); border: 1px solid var(--border); 
+            color: var(--text); padding: 8px 18px; border-radius: 25px; outline: none; 
+            width: 180px; transition: 0.4s; 
+        }
+        .search-input:focus { width: 250px; border-color: var(--accent); }
+
+        header { text-align: center; padding: 150px 20px 40px; }
+        header h1 { font-size: 3.5rem; margin: 0; font-weight: 900; text-shadow: 0 0 20px var(--accent); text-transform: uppercase; }
+
+        /* MENU GRID (4 USTUN) */
+        .menu { 
+            display: grid; grid-template-columns: repeat(4, 1fr); 
+            gap: 25px; padding: 40px 5%; max-width: 1400px; margin: 0 auto; 
+        }
+
+        .item { 
+            position: relative; background: var(--glass); border: 1px solid var(--border); 
+            border-radius: 25px; padding: 20px; text-align: center; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .item:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(255, 0, 204, 0.3); }
+        .item img { width: 100%; height: 170px; border-radius: 20px; object-fit: cover; background: #111; }
+
+        .price { color: var(--accent); font-weight: 800; font-size: 1.3rem; margin: 15px 0; }
+        .button { background: linear-gradient(45deg, var(--accent), #3333ff); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+
+        /* SAVATCHA PANEL */
+        .cart-panel { 
+            position: fixed; top: 0; right: -400px; width: 340px; height: 100%; 
+            background: var(--bg); border-left: 2px solid var(--accent); 
+            z-index: 3000; padding: 30px; transition: 0.5s; 
+            box-shadow: -10px 0 30px #000; overflow-y: auto; 
+        }
+        .cart-panel.active { right: 0; }
+        
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .qty-controls { display: flex; align-items: center; gap: 10px; background: var(--glass); padding: 5px 10px; border-radius: 10px; }
+        .qty-btn { background: none; border: none; color: var(--accent); font-size: 20px; cursor: pointer; font-weight: bold; }
+
+        /* ADMIN PANEL */
+        #admin-box { 
+            position: fixed; top: 100px; right: 20px; width: 250px; 
+            background: var(--bg); border: 2px solid var(--accent); 
+            border-radius: 25px; padding: 20px; z-index: 5000; display: none;
+            box-shadow: 0 0 30px var(--accent);
+        }
+        .admin-handle { cursor: move; background: var(--accent); padding: 5px; border-radius: 10px; text-align: center; font-size: 12px; font-weight: bold; margin-bottom: 15px; color: white; }
+
+        footer { padding: 60px; text-align: center; border-top: 1px solid var(--border); margin-top: 50px; }
+        .f-text { opacity: 0.4; cursor: pointer; user-select: none; }
+
+        @media (max-width: 1100px) { .menu { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 850px) { .menu { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 550px) { .menu { grid-template-columns: repeat(1, 1fr); } }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="logo">CUKUR BURGER</div>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <input type="text" id="searchInput" class="search-input" placeholder="Qidiruv..." oninput="filterItems()">
+        
+        <button onclick="toggleMode()" style="background:none; border:none; cursor:pointer; font-size:20px;">🌓</button>
+        <div onclick="toggleCart()" style="cursor:pointer; font-size:22px; position:relative;">
+            🛒 <span id="cart-badge" style="position:absolute; top:-10px; right:-10px; background:var(--accent); color:white; font-size:10px; padding:2px 6px; border-radius:50%; font-weight:bold;">0</span>
+        </div>
+    </div>
+</nav>
+
+<header><h1 id="t-header">CUKUR BURGER</h1><p id="t-subtitle">Premium Ta'm, Unutilmas Lazzat!</p></header>
+
+<div id="menuList" class="menu"></div>
+
+<!-- Savatcha -->
+<div id="cartPanel" class="cart-panel">
+    <span onclick="toggleCart()" style="float:right; cursor:pointer; font-size:35px; color:var(--accent);">&times;</span>
+    <h2 id="c-title">Sizning savatingiz</h2>
+    <div id="cart-list" style="margin-top:30px;"></div>
+    <hr style="border:0.5px solid var(--border); margin:20px 0;">
+    <h3 style="display:flex; justify-content:space-between;">Jami: <span id="total-price">0</span> so'm</h3>
+    <button class="button" id="btn-order" onclick="checkout()">Sotib olish</button>
+</div>
+
+<!-- Admin Box -->
+<div id="admin-box">
+    <div class="admin-handle" id="adminHeader">ADMIN PANEL (SURISH)</div>
+    <input type="text" id="p-name" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff; border-radius:10px;" placeholder="Taom nomi">
+    <input type="number" id="p-price" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff; border-radius:10px;" placeholder="Narxi">
+    <input type="text" id="p-img" style="width:100%; padding:10px; margin-bottom:10px; background:#000; border:1px solid #333; color:#fff; border-radius:10px;" placeholder="Rasm URL">
+    <button class="button" onclick="addProduct()">Qo'shish</button>
+    <button onclick="closeAdmin()" style="background:none; border:none; color:#ff4d4d; width:100%; margin-top:15px; cursor:pointer; font-weight:bold; font-size:11px;">Yopish</button>
+</div>
+
+<footer><p class="f-text" onclick="handleAdmin()">© 2026 Cukur Burger Premium. Barcha huquqlar himoyalangan.</p></footer>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  // 1. FIREBASE SOZLAMALARI
+  const firebaseConfig = {
+    apiKey: "AIzaSyCZdqBBYEoIXAqln8a9c801AT3G_I_ys4U",
+    authDomain: "shsh-120cf.firebaseapp.com",
+    projectId: "shsh-120cf",
+    storageBucket: "shsh-120cf.firebasestorage.app",
+    messagingSenderId: "897260945183",
+    appId: "1:897260945183:web:6e6fd385b1718ed00afa2a",
+    databaseURL: "https://shsh-120cf-default-rtdb.firebaseio.com"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const productsRef = ref(db, 'products');
+
+  window.products = [];
+  window.cart = JSON.parse(localStorage.getItem('cukur_cart')) || [];
+  window.isAdmin = false;
+  let clicks = 0;
+
+  // 2. TELEGRAM BOT MA'LUMOTLARI (SHU YERNI O'ZGARTIRING)
+  const TELEGRAM_TOKEN = "8740580495:AAGLyL1oeM-Pu96tFzwvb5Y63uJaPWmGgEI"; 
+  const TELEGRAM_CHAT_ID = "7312694067"; 
+
+  // 3. BAZADAN MA'LUMOT OLISH
+  onValue(productsRef, (snapshot) => {
+    const data = snapshot.val();
+    window.products = [];
+    if (data) {
+      Object.keys(data).forEach(key => {
+        window.products.push({ fKey: key, ...data[key] });
+      });
+    }
+    window.renderMenu();
+  });
+
+  // 4. BUYURTMA BERISH (TELEGRAMGA YUBORISH)
+  window.checkout = function() {
+    if (window.cart.length === 0) return alert("Savat bo'sh!");
+
+    const phone = prompt("Telefon raqamingizni kiriting:");
+    const address = prompt("Yetkazib berish manzilini kiriting:");
+
+    if (!phone || !address) {
+        return alert("Ma'lumotlar to'ldirilmadi. Buyurtma bekor qilindi.");
+    }
+
+    // Xabar matnini tayyorlash
+    let message = `🚀 **YANGI BUYURTMA**\n\n`;
+    message += `📞 Tel: ${phone}\n`;
+    message += `📍 Manzil: ${address}\n\n`;
+    message += `🛒 Savat tarkibi:\n`;
+    
+    let total = 0;
+    window.cart.forEach(item => {
+        message += `- ${item.name} (${item.qty} ta) = ${(item.price * item.qty).toLocaleString()} so'm\n`;
+        total += item.price * item.qty;
+    });
+    
+    message += `\n💰 **JAMI: ${total.toLocaleString()} so'm**`;
+
+    // Telegramga yuborish
+    const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            chat_id: TELEGRAM_CHAT_ID,
+            text: message,
+            parse_mode: "Markdown"
+        })
+    })
+    .then(res => {
+        alert("Buyurtmangiz qabul qilindi va Telegram orqali yuborildi! ✅");
+        window.cart = [];
+        window.updateCart();
+        window.toggleCart();
+    })
+    .catch(err => {
+        alert("Xatolik yuz berdi. Internetni tekshiring.");
+        console.error(err);
+    });
+  };
+
+  // 5. BOSHQA FUNKSIYALAR (Qidiruv, Til, Tun/Kun)
+  window.renderMenu = function(data = window.products) {
+    const menu = document.getElementById('menuList');
+    menu.innerHTML = data.map(p => `
+      <div class="item">
+        ${window.isAdmin ? `<button style="position:absolute; top:10px; right:10px; background:red; color:white; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer; z-index:100;" onclick="removeProduct('${p.fKey}')">×</button>` : ''}
+        <img src="${p.img}" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500'">
+        <h3>${p.name}</h3>
+        <div class="price">${p.price.toLocaleString()} so'm</div>
+        <button class="button" onclick="addToCart(${p.id})">Savatga qo'shish</button>
+      </div>
+    `).join('');
+  };
+
+  window.addToCart = function(id) {
+    const p = window.products.find(x => x.id === id);
+    const inCart = window.cart.find(x => x.id === id);
+    if(inCart) inCart.qty++; else window.cart.push({...p, qty: 1});
+    window.updateCart();
+  };
+
+  window.updateCart = function() {
+    localStorage.setItem('cukur_cart', JSON.stringify(window.cart));
+    document.getElementById('cart-badge').innerText = window.cart.reduce((s, i) => s + i.qty, 0);
+    let totalSum = 0;
+    document.getElementById('cart-list').innerHTML = window.cart.map(i => {
+      totalSum += i.price * i.qty;
+      return `<div class="cart-item">
+                <div><b>${i.name}</b><br><small>${i.price.toLocaleString()}</small></div>
+                <div class="qty-controls">
+                  <button class="qty-btn" onclick="decreaseQty(${i.id})">−</button>
+                  <span>${i.qty}</span>
+                  <button class="qty-btn" onclick="addToCart(${i.id})">+</button>
+                </div>
+              </div>`;
+    }).join('');
+    document.getElementById('total-price').innerText = totalSum.toLocaleString();
+  };
+
+  window.decreaseQty = function(id) {
+    const item = window.cart.find(x => x.id === id);
+    if(item.qty > 1) item.qty--; else window.cart = window.cart.filter(x => x.id !== id);
+    window.updateCart();
+  };
+
+  window.toggleMode = () => document.body.classList.toggle('light');
+  window.toggleCart = () => document.getElementById('cartPanel').classList.toggle('active');
+  window.filterItems = () => {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    window.renderMenu(window.products.filter(p => p.name.toLowerCase().includes(q)));
+  };
+  window.handleAdmin = function() {
+    clicks++;
+    if (clicks === 3) {
+      if (prompt("Parol:") === "7777") {
+        window.isAdmin = true;
+        document.getElementById('admin-box').style.display = 'block';
+        window.renderMenu();
+      }
+      clicks = 0;
+    }
+    setTimeout(() => clicks = 0, 2000);
+  };
+  window.removeProduct = (fKey) => remove(ref(db, 'products/' + fKey));
+  window.addProduct = function() {
+    const n = document.getElementById('p-name').value, p = parseInt(document.getElementById('p-price').value), i = document.getElementById('p-img').value;
+    if(n && p && i) set(push(productsRef), { id: Date.now(), name: n, price: p, img: i }).then(() => alert("Qo'shildi!"));
+  };
+  window.closeAdmin = () => { window.isAdmin = false; document.getElementById('admin-box').style.display = 'none'; window.renderMenu(); };
+
+  window.updateCart();
+</script>
+</body>
+</html>
