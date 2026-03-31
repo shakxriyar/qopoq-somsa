@@ -190,15 +190,41 @@ tel: +998-77-577-2042</p></footer>
         window.updateCart();
     };
 
+    // YANGI QO'SHILGAN: Savatchada mahsulotni ko'paytirish va kamaytirish funksiyalari
+    window.increaseQty = function(id) {
+        const item = window.cart.find(x => x.id === id);
+        if(item) {
+            item.qty++;
+            window.updateCart();
+        }
+    };
+
+    window.decreaseQty = function(id) {
+        const index = window.cart.findIndex(x => x.id === id);
+        if(index !== -1) {
+            if(window.cart[index].qty > 1) {
+                window.cart[index].qty--;
+            } else {
+                window.cart.splice(index, 1); // Agar soni 0 bo'lsa savatchadan olib tashlaydi
+            }
+            window.updateCart();
+        }
+    };
+
     window.updateCart = function() {
         localStorage.setItem('cukur_cart', JSON.stringify(window.cart));
         document.getElementById('cart-badge').innerText = window.cart.reduce((s, i) => s + i.qty, 0);
         let totalSum = 0;
         document.getElementById('cart-list').innerHTML = window.cart.map(i => {
             totalSum += i.price * i.qty;
+            // O'ZGARTIRILGAN QISM: + va - tugmalari qo'shildi
             return `<div class="cart-item">
-                <div><b>${i.name}</b><br><small>${i.price.toLocaleString()}</small></div>
-                <div>${i.qty} ta</div>
+                <div><b>${i.name}</b><br><small>${i.price.toLocaleString()} so'm</small></div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <button onclick="decreaseQty(${i.id})" style="background:var(--glass); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:8px; cursor:pointer; font-weight:bold;">-</button>
+                    <span style="font-weight:bold;">${i.qty}</span>
+                    <button onclick="increaseQty(${i.id})" style="background:var(--accent); color:white; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:bold;">+</button>
+                </div>
             </div>`;
         }).join('');
         document.getElementById('total-price').innerText = totalSum.toLocaleString();
