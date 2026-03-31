@@ -9,12 +9,13 @@
         :root {
             --bg: #171717; --text: #d1cdcd; --accent: #ff00cc; 
             --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1);
+            --dark-blue: #00008B; /* To'q ko'k rang */
         }
         .light { --bg: #ccc6c6; --text: #1a1a1a; --glass: rgba(0, 0, 0, 0.05); --border: rgba(0, 0, 0, 0.1); }
 
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: 0.4s; overflow-x: hidden; scroll-behavior: smooth; }
 
-        /* NAVBAR - To'liq versiya */
+        /* NAVBAR */
         .navbar { 
             position: fixed; top: 0; width: 100%; min-height: 70px; 
             display: flex; align-items: center; justify-content: space-between; 
@@ -25,20 +26,20 @@
         
         .nav-tools { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         
-        /* Qidiruv paneli qaytarildi */
         .search-input { 
             background: var(--glass); border: 1px solid var(--border); 
             color: var(--text); padding: 8px 18px; border-radius: 25px; outline: none; 
             width: 140px; transition: 0.4s; font-size: 14px;
         }
-        .search-input:focus { width: 200px; border-color: var(--accent); }
+        .search-input:focus { width: 200px; border-color: var(--dark-blue); }
 
         .nav-link { 
             text-decoration: none; color: var(--text); font-size: 13px; font-weight: bold; 
             background: var(--glass); padding: 8px 16px; border-radius: 20px; 
             border: 1px solid var(--border); transition: 0.3s;
         }
-        .nav-link:hover { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        /* Hover to'q ko'k rangga o'zgartirildi */
+        .nav-link:hover { border-color: var(--dark-blue); background: var(--dark-blue); color: white; box-shadow: none; }
 
         header { text-align: center; padding: 150px 20px 40px; }
         header h1 { font-size: clamp(2.5rem, 10vw, 4rem); margin: 0; font-weight: 900; text-shadow: 0 0 25px var(--accent); text-transform: uppercase; }
@@ -57,17 +58,21 @@
             display: flex; flex-direction: column; justify-content: space-between;
             position: relative;
         }
-        .item:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 10px 30px rgba(255, 0, 204, 0.2); }
+        /* Item hover minimalist qilindi */
+        .item:hover { transform: translateY(-10px); border-color: var(--dark-blue); box-shadow: 0 10px 30px rgba(0, 0, 139, 0.2); }
         .item img { width: 100%; height: 180px; border-radius: 20px; object-fit: cover; background: #111; }
         .item h3 { margin: 15px 0 5px; font-size: 1.3rem; white-space: normal; color: #fff; }
 
         .price { color: var(--accent); font-weight: 800; font-size: 1.3rem; margin: 10px 0; }
         .button { background: linear-gradient(45deg, var(--accent), #3333ff); color: white; border: none; padding: 12px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
 
+        /* Tugma hover to'q ko'k */
+        .button:hover { background: var(--dark-blue); transform: scale(1.02); }
+
         /* SAVATCHA PANEL */
         .cart-panel { 
             position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; 
-            background: var(--bg); border-left: 2px solid var(--accent); 
+            background: var(--bg); border-left: 2px solid var(--dark-blue); 
             z-index: 3000; padding: 30px; transition: 0.5s; 
             box-shadow: -10px 0 30px #000; overflow-y: auto; box-sizing: border-box;
         }
@@ -190,23 +195,16 @@ tel: +998-77-577-2042</p></footer>
         window.updateCart();
     };
 
-    // YANGI QO'SHILGAN: Savatchada mahsulotni ko'paytirish va kamaytirish funksiyalari
     window.increaseQty = function(id) {
         const item = window.cart.find(x => x.id === id);
-        if(item) {
-            item.qty++;
-            window.updateCart();
-        }
+        if(item) { item.qty++; window.updateCart(); }
     };
 
     window.decreaseQty = function(id) {
         const index = window.cart.findIndex(x => x.id === id);
         if(index !== -1) {
-            if(window.cart[index].qty > 1) {
-                window.cart[index].qty--;
-            } else {
-                window.cart.splice(index, 1); // Agar soni 0 bo'lsa savatchadan olib tashlaydi
-            }
+            if(window.cart[index].qty > 1) window.cart[index].qty--;
+            else window.cart.splice(index, 1);
             window.updateCart();
         }
     };
@@ -217,13 +215,12 @@ tel: +998-77-577-2042</p></footer>
         let totalSum = 0;
         document.getElementById('cart-list').innerHTML = window.cart.map(i => {
             totalSum += i.price * i.qty;
-            // O'ZGARTIRILGAN QISM: + va - tugmalari qo'shildi
             return `<div class="cart-item">
                 <div><b>${i.name}</b><br><small>${i.price.toLocaleString()} so'm</small></div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button onclick="decreaseQty(${i.id})" style="background:var(--glass); border:1px solid var(--border); color:var(--text); padding:4px 10px; border-radius:8px; cursor:pointer; font-weight:bold;">-</button>
                     <span style="font-weight:bold;">${i.qty}</span>
-                    <button onclick="increaseQty(${i.id})" style="background:var(--accent); color:white; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:bold;">+</button>
+                    <button onclick="increaseQty(${i.id})" style="background:var(--dark-blue); color:white; border:none; padding:5px 10px; border-radius:8px; cursor:pointer; font-weight:bold;">+</button>
                 </div>
             </div>`;
         }).join('');
