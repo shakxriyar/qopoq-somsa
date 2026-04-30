@@ -1,25 +1,66 @@
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+// Firebase modullarini import qilish
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyCZdqBBYEoIXAqln8a9c801AT3G_I_ys4U",
-        authDomain: "shsh-120cf.firebaseapp.com",
-        projectId: "shsh-120cf",
-        storageBucket: "shsh-120cf.firebasestorage.app",
-        messagingSenderId: "897260945183",
-        appId: "1:897260945183:web:6e6fd385b1718ed00afa2a",
-        databaseURL: "https://shsh-120cf-default-rtdb.firebaseio.com"
-    };
+// Siz taqdim etgan Firebase konfiguratsiyasi
+const firebaseConfig = {
+  apiKey: "AIzaSyCZdqBBYEoIXAqln8a9c801AT3G_I_ys4U",
+  authDomain: "shsh-120cf.firebaseapp.com",
+  databaseURL: "https://shsh-120cf-default-rtdb.firebaseio.com",
+  projectId: "shsh-120cf",
+  storageBucket: "shsh-120cf.firebasestorage.app",
+  messagingSenderId: "897260945183",
+  appId: "1:897260945183:web:6e6fd385b1718ed00afa2a",
+  measurementId: "G-NDYE872XCD"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const productsRef = ref(db, 'products');
+// Firebase-ni ishga tushirish
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
 
-    window.products = [];
-    window.cart = JSON.parse(localStorage.getItem('burger_cart_blue_final')) || [];
-    window.isAdmin = false;
-    let clicks = 0;
+// HTML elementlarini tanlab olish
+const contactForm = document.getElementById('contactForm');
 
+// Formani yuborish hodisasi
+contactForm.addEventListener('submit', (e) => {
+    e.preventDefault(); // Sahifa yangilanib ketishini oldini oladi
+
+    // Formadagi qiymatlarni olish
+    const name = document.getElementById('userName').value;
+    const phone = document.getElementById('userPhone').value;
+    const message = document.getElementById('userMessage').value;
+    const submitBtn = document.getElementById('submitBtn');
+
+    // Tugmani vaqtincha faolsizlantirish (takroriy bosishni oldini olish)
+    submitBtn.disabled = true;
+    submitBtn.innerText = "YUBORILMOQDA...";
+
+    // Ma'lumotlarni Firebase-ga "messages" papkasiga saqlash
+    const messagesRef = ref(database, 'messages');
+    const newMessageRef = push(messagesRef);
+
+    set(newMessageRef, {
+        username: name,
+        phone: phone,
+        message: message,
+        timestamp: new Date().toISOString()
+    })
+    .then(() => {
+        // Muvaffaqiyatli yuborilganda
+        alert("Habaringiz muvaffaqiyatli yuborildi!");
+        contactForm.reset(); // Formani tozalash
+    })
+    .catch((error) => {
+        // Xatolik yuz berganda
+        console.error("Xatolik yuz berdi: ", error);
+        alert("Xatolik yuz berdi. Qayta urinib ko'ring.");
+    })
+    .finally(() => {
+        // Tugmani yana faollashtirish
+        submitBtn.disabled = false;
+        submitBtn.innerText = "YUBORISH";
+    });
+});
     // Eski CHAT_ID bitta edi, endi biz massiv (list) ko'rinishida qilamiz
 const BOT_TOKEN = "8740580495:AAGLyL1oeM-Pu96tFzwvb5Y63uJaPWmGgEI"; // O'z joyida qoladi
 const ADMIN_ID = "8030496668"; // Bu sizning ID ingiz (Admin)
