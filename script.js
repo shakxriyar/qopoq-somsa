@@ -1,4 +1,4 @@
-// Firebase modullarini import qilish
+// Firebase modullarini import qilish - Sayt qoidalariga ko'ra to'liq formatda
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
@@ -18,24 +18,27 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-// HTML elementlarini tanlab olish
-const contactForm = document.getElementById('contactForm');
+// Formadan xabar yuborish funksiyasini Firebase bilan integratsiya qilish
+window.sendContactMsg = function() {
+    // Saytdagi mavjud ID lar orqali qiymatlarni olish
+    const name = document.getElementById('msg-name').value;
+    const phone = document.getElementById('msg-phone').value;
+    const message = document.getElementById('msg-text').value;
+    const submitBtn = document.querySelector('.footer-form .button');
 
-// Formani yuborish hodisasi
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault(); // Sahifa yangilanib ketishini oldini oladi
+    // Barcha maydonlar to'ldirilganligini tekshirish
+    if(!name || !phone || !message) {
+        alert("Iltimos, barcha maydonlarni to'ldiring!");
+        return;
+    }
 
-    // Formadagi qiymatlarni olish
-    const name = document.getElementById('userName').value;
-    const phone = document.getElementById('userPhone').value;
-    const message = document.getElementById('userMessage').value;
-    const submitBtn = document.getElementById('submitBtn');
+    // Tugmani vaqtincha faolsizlantirish (Luxury stiliga mos animatsiya uchun)
+    if(submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "YUBORILMOQDA...";
+    }
 
-    // Tugmani vaqtincha faolsizlantirish (takroriy bosishni oldini olish)
-    submitBtn.disabled = true;
-    submitBtn.innerText = "YUBORILMOQDA...";
-
-    // Ma'lumotlarni Firebase-ga "messages" papkasiga saqlash
+    // 1. Firebase Realtime Database'ga saqlash
     const messagesRef = ref(database, 'messages');
     const newMessageRef = push(messagesRef);
 
@@ -46,21 +49,38 @@ contactForm.addEventListener('submit', (e) => {
         timestamp: new Date().toISOString()
     })
     .then(() => {
-        // Muvaffaqiyatli yuborilganda
-        alert("Habaringiz muvaffaqiyatli yuborildi!");
-        contactForm.reset(); // Formani tozalash
+        // 2. Telegramga ham yuborish (Sizning mavjud Telegram kodingiz bilan birga ishlaydi)
+        const BOT_TOKEN = "8740580495:AAGLyL1oeM-Pu96tFzwvb5Y63uJaPWmGgEI"; 
+        const CHAT_ID = "8030496668"; 
+        const text = `📬 YANGI HABAR (Firebase + Aloqa):\n\n👤 Ism: ${name}\n📞 Tel: ${phone}\n💬 Habar: ${message}`;
+
+        return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+        });
+    })
+    .then(() => {
+        // Muvaffaqiyatli yakunlanganda
+        alert("Habaringiz Firebase bazasiga saqlandi va Telegramga yuborildi!");
+        
+        // Formani tozalash
+        document.getElementById('msg-name').value = '';
+        document.getElementById('msg-phone').value = '';
+        document.getElementById('msg-text').value = '';
     })
     .catch((error) => {
-        // Xatolik yuz berganda
-        console.error("Xatolik yuz berdi: ", error);
-        alert("Xatolik yuz berdi. Qayta urinib ko'ring.");
+        console.error("Xatolik:", error);
+        alert("Xatolik yuz berdi. Iltimos qayta urinib ko'ring.");
     })
     .finally(() => {
-        // Tugmani yana faollashtirish
-        submitBtn.disabled = false;
-        submitBtn.innerText = "YUBORISH";
+        // Tugmani asl holatiga qaytarish
+        if(submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "YUBORISH";
+        }
     });
-});
+};
     // Eski CHAT_ID bitta edi, endi biz massiv (list) ko'rinishida qilamiz
 const BOT_TOKEN = "8740580495:AAGLyL1oeM-Pu96tFzwvb5Y63uJaPWmGgEI"; // O'z joyida qoladi
 const ADMIN_ID = "8030496668"; // Bu sizning ID ingiz (Admin)
