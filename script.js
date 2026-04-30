@@ -170,3 +170,34 @@ window.closeAdmin = () => {
 };
 
 window.updateCart();
+
+window.updateCart = function() {
+    localStorage.setItem('burger_cart_blue_final', JSON.stringify(window.cart));
+    
+    const badge = document.getElementById('cart-badge');
+    if(badge) badge.innerText = window.cart.reduce((s, i) => s + i.qty, 0);
+    
+    let total = 0;
+    const cartList = document.getElementById('cart-list');
+    
+    if(cartList) {
+        if(window.cart.length === 0) {
+            cartList.innerHTML = `<p style="color:#666; text-align:center; margin-top:20px;">Savat bo'sh</p>`;
+        } else {
+            cartList.innerHTML = window.cart.map(i => {
+                total += i.price * i.qty;
+                return `
+                    <div class="cart-item">
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:bold;">${i.name}</span>
+                            <span style="font-size:0.8rem; color:#aaa;">${i.qty} dona x ${i.price.toLocaleString()}</span>
+                        </div>
+                        <span class="item-price">${(i.price * i.qty).toLocaleString()} so'm</span>
+                    </div>`;
+            }).join('');
+        }
+    }
+    
+    const totalEl = document.getElementById('total-price');
+    if(totalEl) totalEl.innerText = total.toLocaleString() + " so'm";
+};
