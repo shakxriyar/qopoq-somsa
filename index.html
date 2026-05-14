@@ -5,108 +5,201 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QOPOQ SOMSA | Premium Dining</title>
     <link rel="icon" type="image/png" href="./Clipped_image_20260425_093014.png">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./style.css">
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <body>
 
+<!-- ═══════ NAVBAR ═══════ -->
 <nav class="navbar">
-    <a href="index.html" class="logo">QOPOQ SOMSA</a>
+    <a href="index.html" class="logo">
+        <span class="logo-top">QOPOQ</span>
+        <span class="logo-bot">SOMSA</span>
+    </a>
     <div class="nav-tools">
-        <input type="text" id="searchInput" class="search-input" placeholder="Qidirish..." oninput="filterItems()">
-        <div onclick="toggleCart()" style="cursor:pointer; font-size:24px; position:relative;">
-            🛒 <span id="cart-badge" style="position:absolute; top:-8px; right:-10px; background:var(--accent); color:#000; font-size:11px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border-radius:50%; font-weight:bold;">0</span>
+        <div class="search-wrapper">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Qidirish..." oninput="filterItems()">
         </div>
+        <button class="cart-btn" onclick="toggleCart()" aria-label="Savat">
+            <i class="fas fa-shopping-basket"></i>
+            <span id="cart-badge" class="cart-badge">0</span>
+        </button>
     </div>
 </nav>
 
-<header>
-    <h1>QOPOQ SOMSA</h1>
-    <p style="letter-spacing: 3px; opacity: 0.8;">Xorazmning eng sara "Qopoq Somsalari" va milliy taomlari</p>
+<!-- ═══════ HERO ═══════ -->
+<header class="hero">
+    <div class="hero-grain"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <p class="hero-eyebrow">✦ &nbsp; Xorazm Milliy Taomlari &nbsp; ✦</p>
+        <h1 class="hero-title">QOPOQ<br><em>SOMSA</em></h1>
+        <div class="hero-rule"></div>
+        <p class="hero-sub">Xorazmning eng sara ta'mlari — Luxury uslubda</p>
+        <div class="hero-stats">
+            <div class="hstat"><span class="hstat-n">500+</span><span class="hstat-l">Xaridor</span></div>
+            <div class="hstat-div"></div>
+            <div class="hstat"><span class="hstat-n">4.9 ★</span><span class="hstat-l">Reyting</span></div>
+            <div class="hstat-div"></div>
+            <div class="hstat"><span class="hstat-n">10+</span><span class="hstat-l">Taom</span></div>
+        </div>
+    </div>
+    <div class="hero-scroll-hint">
+        <span>Menyuni ko'rish</span>
+        <div class="scroll-arr"><i class="fas fa-chevron-down"></i></div>
+    </div>
 </header>
 
-<div id="menuList" class="menu"></div>
+<!-- ═══════ MENU SECTION ═══════ -->
+<section class="menu-section">
+    <div class="sec-head">
+        <div class="sec-line"></div>
+        <h2 class="sec-title">MENYUMIZ</h2>
+        <div class="sec-line"></div>
+    </div>
+    <div id="menuList" class="menu"></div>
+</section>
 
+<!-- ═══════ PRODUCT MODAL ═══════ -->
+<div id="productModal" class="modal-overlay" onclick="closeModalOutside(event)">
+    <div class="modal-card">
+        <button class="modal-x" onclick="closeModal()"><i class="fas fa-times"></i></button>
+        <div class="modal-layout">
+
+            <div class="modal-img-col">
+                <img id="modal-img" src="" alt="" class="modal-img"
+                     onerror="this.src='https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80'">
+                <div class="modal-hot-badge" id="modal-badge"></div>
+            </div>
+
+            <div class="modal-info-col">
+                <span class="modal-cat">🥟 &nbsp; Milliy taom</span>
+                <h2 class="modal-pname" id="modal-name">—</h2>
+
+                <div class="modal-price-line">
+                    <span class="modal-price" id="modal-price">0 so'm</span>
+                    <span class="modal-per">/ 1 dona</span>
+                </div>
+
+                <div class="modal-chips">
+                    <span class="chip chip-fire"><i class="fas fa-fire"></i> <span id="modal-sales">—</span></span>
+                    <span class="chip chip-star"><i class="fas fa-star"></i> 4.8</span>
+                    <span class="chip chip-time"><i class="fas fa-clock"></i> 20-30 min</span>
+                </div>
+
+                <p class="modal-desc" id="modal-desc">Xorazmning an'anaviy mashhur taomi. Sifatli mahalliy ingredientlardan tayyorlangan, to'yimli va mazali.</p>
+
+                <div class="modal-qty-bar">
+                    <span class="qty-lbl">Miqdor</span>
+                    <div class="qty-box">
+                        <button class="qb minus" onclick="changeModalQty(-1)">−</button>
+                        <span class="qn" id="modal-qty">1</span>
+                        <button class="qb plus" onclick="changeModalQty(1)">+</button>
+                    </div>
+                    <span class="qty-sum" id="modal-total">—</span>
+                </div>
+
+                <button class="modal-cta" onclick="addModalToCart()">
+                    <i class="fas fa-shopping-basket"></i>
+                    Savatga qo'shish
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════ CART PANEL ═══════ -->
+<div class="cart-backdrop" id="cart-backdrop" onclick="toggleCart()"></div>
 <div id="cartPanel" class="cart-panel">
-    <span onclick="toggleCart()" style="float:right; cursor:pointer; font-size:40px; color:var(--accent);">&times;</span>
-    <h2 style="font-family:'Playfair Display', serif; color:var(--accent)">Sizning Savatingiz</h2>
-    <div id="cart-list" style="margin-top:30px; border-top:1px solid var(--border); padding-top:20px;"></div>
-    <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:1.4rem;">
-        <span>Jami:</span>
-        <span id="total-price" style="color:var(--accent)">0</span>
+    <div class="cart-head">
+        <span class="cart-title"><i class="fas fa-shopping-basket"></i> Savat</span>
+        <button class="cart-x" onclick="toggleCart()"><i class="fas fa-times"></i></button>
     </div>
-    <button class="button" style="margin-top:30px;" onclick="checkout()">Buyurtmani rasmiylashtirish</button>
+    <div id="cart-list" class="cart-body"></div>
+    <div class="cart-foot">
+        <div class="cart-sum-row">
+            <span>Jami to'lov</span>
+            <span id="total-price" class="cart-sum">0 so'm</span>
+        </div>
+        <button class="checkout-btn" onclick="checkout()">
+            <i class="fas fa-check-circle"></i> Buyurtma berish
+        </button>
+    </div>
 </div>
 
+<!-- ═══════ ADMIN PANEL ═══════ -->
 <div id="admin-box">
-    <div id="admin-drag-header" style="cursor: move; padding: 10px; background: rgba(197, 160, 89, 0.1); border-radius: 15px 15px 0 0; margin: -35px -35px 20px -35px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-        <span style="color: var(--accent); font-family: 'Playfair Display'; font-weight: bold; margin-left: 15px;">Boshqaruv</span>
-        <i class="fas fa-arrows-alt" style="color: var(--accent); margin-right: 15px; font-size: 12px; opacity: 0.6;"></i>
+    <div id="admin-drag-header">
+        <span class="adm-title"><i class="fas fa-crown"></i> Admin Panel</span>
+        <i class="fas fa-grip-vertical adm-drag-icon"></i>
     </div>
-    
-    <div style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" id="p-name" class="admin-input" placeholder="Taom nomi">
-        <input type="number" id="p-price" class="admin-input" placeholder="Narxi">
-        <input type="text" id="p-img" class="admin-input" placeholder="Rasm URL">
-        <button class="button" onclick="addProduct()" style="padding: 10px; font-size: 13px;">QO'SHISH</button>
-        <button onclick="closeAdmin()" style="background:none; border:none; color:rgba(255,255,255,0.4); cursor:pointer; font-size: 12px;">Yopish</button>
+    <div class="adm-body">
+        <div class="adm-field">
+            <label>Taom nomi *</label>
+            <input type="text" id="p-name" class="admin-input" placeholder="Masalan: Qopoq Somsa">
+        </div>
+        <div class="adm-field">
+            <label>Narxi (so'm) *</label>
+            <input type="number" id="p-price" class="admin-input" placeholder="Masalan: 15000">
+        </div>
+        <div class="adm-field">
+            <label>Rasm URL *</label>
+            <input type="text" id="p-img" class="admin-input" placeholder="https://...">
+        </div>
+        <div class="adm-field">
+            <label>Tavsif</label>
+            <input type="text" id="p-desc" class="admin-input" placeholder="Taom haqida ma'lumot">
+        </div>
+        <button class="button adm-add-btn" onclick="addProduct()">
+            <i class="fas fa-plus"></i> Qo'shish
+        </button>
+        <button onclick="closeAdmin()" class="adm-close-lnk">Yopish</button>
     </div>
 </div>
 
+<!-- ═══════ TOAST ═══════ -->
+<div id="toast" class="toast"></div>
+
+<!-- ═══════ FOOTER ═══════ -->
 <footer class="premium-footer">
+    <div class="footer-top-ornament">
+        <div class="foot-line"></div>
+        <span class="foot-ornament">✦ QOPOQ SOMSA ✦</span>
+        <div class="foot-line"></div>
+    </div>
     <div class="footer-grid">
         <div class="footer-section">
-            <h3>QOPOQ SOMSA Premium</h3>
-            <p style="opacity: 0.7; line-height: 1.8;">Xorazmning lazzatli an'analarini zamonaviy Luxury uslubda taqdim etamiz. Bizning har bir taomimiz san'at asaridir.</p>
+            <h3>QOPOQ SOMSA</h3>
+            <p>Xorazmning lazzatli an'analarini zamonaviy Luxury uslubda taqdim etamiz. Har bir taomimiz san'at asari.</p>
             <div class="social-icons">
-                <a href="https://t.me/shakxriyarr" target="_blank"><i class="fab fa-telegram-plane"></i></a>
-                <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-                <a href="tel:+998775772042"><i class="fas fa-phone-alt"></i></a>
+                <a href="https://t.me/shakxriyarr" target="_blank" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+                <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="tel:+998775772042" aria-label="Telefon"><i class="fas fa-phone-alt"></i></a>
             </div>
         </div>
-
         <div class="footer-section">
             <h3>Bog'lanish</h3>
-            <div class="contact-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Toshkent, Chilonzor, Cukur ko'chasi 1-uy</span>
-            </div>
-            <div class="contact-item">
-                <i class="fas fa-phone-alt"></i>
-                <span>+998 77 577 20 42</span>
-            </div>
-            <div class="contact-item">
-                <i class="fas fa-clock"></i>
-                <span>Har kuni: 10:00 - 23:00</span>
-            </div>
+            <div class="contact-item"><i class="fas fa-map-marker-alt"></i><span>Toshkent, Chilonzor, Cukur ko'chasi 1-uy</span></div>
+            <div class="contact-item"><i class="fas fa-phone-alt"></i><span>+998 77 577 20 42</span></div>
+            <div class="contact-item"><i class="fas fa-clock"></i><span>Har kuni: 10:00 – 23:00</span></div>
         </div>
-
         <div class="footer-section">
             <h3>Habar yuboring</h3>
             <div class="footer-form">
-                <input type="text" id="msg-name" placeholder="Ismingiz" required>
-                <input type="tel" id="msg-phone" placeholder="Telefon raqamingiz" required>
-                <textarea id="msg-text" rows="3" placeholder="Habaringiz..." required></textarea>
+                <input type="text" id="msg-name" placeholder="Ismingiz">
+                <input type="tel" id="msg-phone" placeholder="Telefon raqamingiz">
+                <textarea id="msg-text" rows="3" placeholder="Habaringiz..."></textarea>
                 <button class="button" onclick="sendContactMsg()">Yuborish</button>
             </div>
         </div>
     </div>
+    <div class="copyright" onclick="handleAdmin()">
+        © 2026 QOPOQ SOMSA Premium. Barcha huquqlar himoyalangan.
+    </div>
+</footer>
 
-  <div class="copyright" onclick="handleAdmin()">
-    © 2026 QOPOQ SOMSA Premium. Barcha huquqlar himoyalangan.
-</div>
-<script type="module" src="./script.js">
-  
-</script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>
-  AOS.init({
-    duration: 1000, // Effekt davomiyligi (ms)
-    once: true,     // Faqat bir marta chiqsin (pastga tushganda)
-    offset: 100     // Element necha piksel ko'ringanda effekt ishlasin
-  });
-</script>
+<script type="module" src="./script.js"></script>
 </body>
 </html>
