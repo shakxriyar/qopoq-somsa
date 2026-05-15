@@ -159,6 +159,84 @@
     </div>
 </div>
 
+<!-- ═══════ ORDER MODAL (2-step) ═══════ -->
+<div class="order-overlay" id="orderOverlay" onclick="orderOverlayClose(event)">
+    <div class="order-sheet" id="orderSheet">
+
+        <!-- Progress dots -->
+        <div class="order-progress">
+            <span class="order-dot active" id="odot-1"></span>
+            <span class="order-dot" id="odot-2"></span>
+            <span class="order-dot" id="odot-3"></span>
+        </div>
+        <button class="order-x" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
+
+        <!-- ── STEP 1: TELEFON ── -->
+        <div class="order-step" id="ostep-1">
+            <div class="order-icon-title">
+                <span class="order-icon-wrap"><i class="fas fa-phone-alt"></i></span>
+                <h3 class="order-step-title">Telefon raqamingiz</h3>
+            </div>
+            <label class="order-label">Raqamingizni kiriting</label>
+            <input type="tel" id="order-tel" class="order-input"
+                   placeholder="+998 90 123 45 67"
+                   oninput="formatTelInput(this)">
+            <button class="order-next-btn" onclick="orderStep1Next()">
+                Davom etish <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- ── STEP 2: MANZIL ── -->
+        <div class="order-step hidden" id="ostep-2">
+            <div class="order-icon-title">
+                <span class="order-icon-wrap"><i class="fas fa-map-marker-alt"></i></span>
+                <h3 class="order-step-title">Manzilingiz</h3>
+            </div>
+            <label class="order-label">Ko'cha, uy raqami</label>
+            <input type="text" id="order-manzil" class="order-input"
+                   placeholder="Masalan: Chilonzor, 7-kvartal, 12-uy">
+            <button class="order-gps-btn" onclick="getGPS()">
+                <i class="fas fa-crosshairs"></i> GPS lokatsiyani olish
+            </button>
+            <button class="order-next-btn" onclick="orderStep2Next()">
+                Davom etish <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="order-back-btn" onclick="orderGoBack(2)">
+                <i class="fas fa-arrow-left"></i> Orqaga
+            </button>
+        </div>
+
+        <!-- ── STEP 3: TASDIQLASH ── -->
+        <div class="order-step hidden" id="ostep-3">
+            <div class="order-icon-title">
+                <span class="order-icon-wrap order-icon-check"><i class="fas fa-check-circle"></i></span>
+                <h3 class="order-step-title">Buyurtmani tasdiqlang</h3>
+            </div>
+            <div class="order-confirm-rows">
+                <div class="order-confirm-row">
+                    <span class="ocr-label"><i class="fas fa-phone-alt"></i> Telefon</span>
+                    <span class="ocr-val" id="ocr-tel">—</span>
+                </div>
+                <div class="order-confirm-row">
+                    <span class="ocr-label"><i class="fas fa-map-marker-alt"></i> Manzil</span>
+                    <span class="ocr-val" id="ocr-manzil">—</span>
+                </div>
+                <div class="order-confirm-row order-confirm-total">
+                    <span class="ocr-label"><i class="fas fa-coins"></i> Jami</span>
+                    <span class="ocr-val ocr-gold" id="ocr-total">—</span>
+                </div>
+            </div>
+            <button class="order-next-btn order-send-btn" onclick="sendOrder()">
+                <i class="fas fa-paper-plane"></i> Buyurtma berish
+            </button>
+            <button class="order-back-btn" onclick="orderGoBack(3)">
+                <i class="fas fa-arrow-left"></i> Orqaga
+            </button>
+        </div>
+
+    </div>
+</div>
+
 <!-- ═══════ TOAST ═══════ -->
 <div id="toast" class="toast"></div>
 
