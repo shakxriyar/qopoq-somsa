@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>QOPOQ SOMSA | Premium Dining</title>
     <link rel="icon" type="image/png" href="./Clipped_image_20260425_093014.png">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -21,6 +21,10 @@
             <i class="fas fa-search"></i>
             <input type="text" id="searchInput" class="search-input" placeholder="Qidirish..." oninput="filterItems()">
         </div>
+        <a href="orders.html" class="orders-track-btn" title="Buyurtmalarim">
+            <i class="fas fa-receipt"></i>
+            <span class="orders-track-label">Buyurtmalarim</span>
+        </a>
         <button class="cart-btn" onclick="toggleCart()" aria-label="Savat">
             <i class="fas fa-shopping-basket"></i>
             <span id="cart-badge" class="cart-badge">0</span>
@@ -63,30 +67,24 @@
     <div class="modal-card">
         <button class="modal-x" onclick="closeModal()"><i class="fas fa-times"></i></button>
         <div class="modal-layout">
-
             <div class="modal-img-col">
                 <img id="modal-img" src="" alt="" class="modal-img"
                      onerror="this.src='https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80'">
                 <div class="modal-hot-badge" id="modal-badge"></div>
             </div>
-
             <div class="modal-info-col">
                 <span class="modal-cat">🥟 &nbsp; Milliy taom</span>
                 <h2 class="modal-pname" id="modal-name">—</h2>
-
                 <div class="modal-price-line">
                     <span class="modal-price" id="modal-price">0 so'm</span>
                     <span class="modal-per">/ 1 dona</span>
                 </div>
-
                 <div class="modal-chips">
                     <span class="chip chip-fire"><i class="fas fa-fire"></i> <span id="modal-sales">—</span></span>
                     <span class="chip chip-star"><i class="fas fa-star"></i> 4.8</span>
                     <span class="chip chip-time"><i class="fas fa-clock"></i> 20-30 min</span>
                 </div>
-
                 <p class="modal-desc" id="modal-desc">Xorazmning an'anaviy mashhur taomi. Sifatli mahalliy ingredientlardan tayyorlangan, to'yimli va mazali.</p>
-
                 <div class="modal-qty-bar">
                     <span class="qty-lbl">Miqdor</span>
                     <div class="qty-box">
@@ -96,7 +94,6 @@
                     </div>
                     <span class="qty-sum" id="modal-total">—</span>
                 </div>
-
                 <button class="modal-cta" onclick="addModalToCart()">
                     <i class="fas fa-shopping-basket"></i>
                     Savatga qo'shish
@@ -153,9 +150,9 @@
     </div>
 </div>
 
+<!-- ORDER OVERLAY -->
 <div class="order-overlay" id="orderOverlay" onclick="orderOverlayClose(event)">
     <div class="order-sheet" id="orderSheet">
-
         <div class="order-progress">
             <span class="order-dot active" id="odot-1"></span>
             <span class="order-dot" id="odot-2"></span>
@@ -163,6 +160,7 @@
         </div>
         <button class="order-x" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
 
+        <!-- STEP 1: Phone -->
         <div class="order-step" id="ostep-1">
             <div class="order-icon-title">
                 <span class="order-icon-wrap"><i class="fas fa-phone-alt"></i></span>
@@ -171,12 +169,15 @@
             <label class="order-label">Raqamingizni kiriting</label>
             <input type="tel" id="order-tel" class="order-input"
                    placeholder="+998 90 123 45 67"
-                   oninput="formatTelInput(this)">
+                   oninput="formatTelInput(this)"
+                   onfocus="initTelPrefix(this)"
+                   onkeydown="if(event.key==='Enter') orderStep1Next()">
             <button class="order-next-btn" onclick="orderStep1Next()">
                 Davom etish <i class="fas fa-arrow-right"></i>
             </button>
         </div>
 
+        <!-- STEP 2: Address -->
         <div class="order-step hidden" id="ostep-2">
             <div class="order-icon-title">
                 <span class="order-icon-wrap"><i class="fas fa-map-marker-alt"></i></span>
@@ -196,6 +197,7 @@
             </button>
         </div>
 
+        <!-- STEP 3: Confirm -->
         <div class="order-step hidden" id="ostep-3">
             <div class="order-icon-title">
                 <span class="order-icon-wrap order-icon-check"><i class="fas fa-check-circle"></i></span>
@@ -215,6 +217,10 @@
                     <span class="ocr-val ocr-gold" id="ocr-total">—</span>
                 </div>
             </div>
+            <div class="orders-track-hint">
+                <i class="fas fa-receipt"></i>
+                Buyurtma bergandan so'ng <a href="orders.html">Buyurtmalarim</a> sahifasida holatini kuzatib boring
+            </div>
             <button class="order-next-btn order-send-btn" onclick="sendOrder()">
                 <i class="fas fa-paper-plane"></i> Buyurtma berish
             </button>
@@ -222,7 +228,6 @@
                 <i class="fas fa-arrow-left"></i> Orqaga
             </button>
         </div>
-
     </div>
 </div>
 
