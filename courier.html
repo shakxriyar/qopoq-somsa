@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuryer Panel — QOPOQ SOMSA</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --bg:#05070b; --bg2:#080b10; --card:#0c1018; --card-h:#111720;
+    --gold:#c8a45a; --gold-lt:#e0c27c; --gold-dk:#9a7b42;
+    --gold-glow:rgba(200,164,90,.18);
+    --text:#eaf0f9; --muted:#7a8fa6;
+    --border:rgba(200,164,90,.13); --border-h:rgba(200,164,90,.38);
+    --grad:linear-gradient(135deg,#c8a45a 0%,#9a7b42 100%);
+    --r:14px; --r-sm:9px;
+    --ff-d:'Cormorant Garamond',Georgia,serif;
+    --ff-b:'Outfit',system-ui,sans-serif;
+    --ease:cubic-bezier(.4,0,.2,1);
+    --green:#34c759; --red:#ff3b30; --orange:#ff9500; --blue:#007aff;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--ff-b);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+img{display:block;max-width:100%}
+button{font-family:var(--ff-b);cursor:pointer}
+a{text-decoration:none}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--gold-dk);border-radius:3px}
+body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.45}
+
+/* ── LOGIN SCREEN ── */
+.login-screen{
+    display:flex;align-items:center;justify-content:center;
+    min-height:100vh;padding:24px;
+    background:radial-gradient(ellipse at 50% 0%,rgba(200,164,90,.12) 0%,transparent 70%);
+}
+.login-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:var(--r);padding:48px 44px;
+    width:100%;max-width:400px;text-align:center;
+    box-shadow:0 32px 80px rgba(0,0,0,.6);
+    position:relative;overflow:hidden;
+}
+.login-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:var(--grad);
+}
+.login-logo-top{font-family:var(--ff-d);font-size:1.4rem;font-weight:700;color:var(--gold);letter-spacing:6px}
+.login-logo-bot{font-size:.58rem;color:var(--muted);letter-spacing:8px;margin-top:2px;margin-bottom:32px}
+.login-icon{width:72px;height:72px;border-radius:50%;background:rgba(200,164,90,.1);border:1px solid var(--border-h);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;color:var(--gold);font-size:1.8rem}
+.login-title{font-family:var(--ff-d);font-size:1.7rem;font-weight:700;color:var(--text);margin-bottom:6px}
+.login-sub{font-size:.8rem;color:var(--muted);margin-bottom:32px}
+.login-label{display:block;text-align:left;font-size:.62rem;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;font-weight:600;margin-bottom:8px}
+.login-input{
+    width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
+    color:var(--text);padding:14px 16px;border-radius:var(--r-sm);
+    outline:none;font-family:var(--ff-b);font-size:.92rem;
+    transition:all .3s;margin-bottom:14px;
+}
+.login-input:focus{border-color:var(--gold);background:rgba(255,255,255,.08)}
+.login-input::placeholder{color:var(--muted)}
+.login-btn{
+    width:100%;background:var(--grad);color:#05070b;border:none;
+    padding:15px 28px;border-radius:var(--r-sm);font-weight:700;
+    font-size:.9rem;letter-spacing:1.5px;text-transform:uppercase;
+    cursor:pointer;transition:all .3s;margin-top:4px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+}
+.login-btn:hover{filter:brightness(1.1);box-shadow:0 8px 30px rgba(200,164,90,.3)}
+.login-err{color:#ff6b62;font-size:.78rem;margin-top:10px;min-height:20px}
+.login-kuryer-btns{display:flex;gap:10px;margin-bottom:20px}
+.kuryer-sel-btn{
+    flex:1;padding:12px;border-radius:var(--r-sm);border:1px solid var(--border);
+    background:transparent;color:var(--muted);font-family:var(--ff-b);
+    font-size:.8rem;font-weight:600;cursor:pointer;transition:all .25s;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.kuryer-sel-btn:hover{border-color:var(--border-h);color:var(--text)}
+.kuryer-sel-btn.sel{background:rgba(200,164,90,.12);border-color:var(--gold);color:var(--gold)}
+
+/* ── MAIN PANEL ── */
+.courier-panel{display:none;min-height:100vh}
+
+/* ── TOP BAR ── */
+.courier-topbar{
+    position:sticky;top:0;z-index:200;
+    background:rgba(5,7,11,.92);backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border);
+    padding:0 24px;height:66px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.ct-logo{font-family:var(--ff-d);font-size:1.1rem;font-weight:700;color:var(--gold);letter-spacing:5px}
+.ct-id-badge{
+    display:flex;align-items:center;gap:9px;
+    background:rgba(200,164,90,.1);border:1px solid rgba(200,164,90,.25);
+    padding:7px 14px;border-radius:30px;font-size:.8rem;color:var(--gold);font-weight:600;
+}
+.ct-id-badge i{font-size:.75rem}
+.ct-right{display:flex;align-items:center;gap:12px}
+.ct-logout{
+    padding:8px 16px;border-radius:30px;border:1px solid var(--border);
+    background:transparent;color:var(--muted);font-family:var(--ff-b);
+    font-size:.75rem;cursor:pointer;transition:all .25s;
+    display:flex;align-items:center;gap:7px;
+}
+.ct-logout:hover{border-color:rgba(255,59,48,.4);color:#ff6b62}
+.ct-badge-wrap{position:relative}
+.ct-notif-dot{
+    position:absolute;top:-4px;right:-4px;width:10px;height:10px;
+    background:var(--gold);border-radius:50%;border:2px solid var(--bg);
+    display:none;
+}
+.ct-notif-dot.show{display:block}
+
+/* ── CONTENT ── */
+.courier-content{padding:28px 24px;max-width:900px;margin:0 auto}
+
+/* ── STATS ROW ── */
+.c-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+.c-stat{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--r);
+    padding:18px 16px;text-align:center;transition:border-color .3s;
+}
+.c-stat:hover{border-color:var(--border-h)}
+.c-stat-n{font-family:var(--ff-d);font-size:1.8rem;font-weight:700;color:var(--text)}
+.c-stat-l{font-size:.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.c-stat.gold .c-stat-n{color:var(--gold)}
+.c-stat.green .c-stat-n{color:var(--green)}
+.c-stat.orange .c-stat-n{color:var(--orange)}
+
+/* ── TAB BAR ── */
+.c-tabs{display:flex;gap:8px;margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px;width:fit-content}
+.c-tab{
+    padding:9px 20px;border-radius:7px;border:none;background:transparent;
+    color:var(--muted);font-family:var(--ff-b);font-size:.82rem;font-weight:600;
+    cursor:pointer;transition:all .25s;display:flex;align-items:center;gap:8px;
+}
+.c-tab.active{background:rgba(200,164,90,.14);color:var(--gold);border:1px solid rgba(200,164,90,.25) }
+.c-tab .tab-count{
+    min-width:18px;height:18px;background:var(--gold);color:#05070b;
+    font-size:.6rem;font-weight:700;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;padding:0 4px;
+}
+
+/* ── ORDER CARDS ── */
+.c-orders{display:flex;flex-direction:column;gap:16px}
+.c-order-card{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:var(--r);overflow:hidden;
+    transition:border-color .3s,transform .25s;
+    animation:fadeUp .4s var(--ease) both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.c-order-card:hover{border-color:rgba(200,164,90,.28);transform:translateY(-2px)}
+.c-order-card.status-yangi{border-left:3px solid var(--gold)}
+.c-order-card.status-tayinlandi{border-left:3px solid var(--blue)}
+.c-order-card.status-yetkazildi{border-left:3px solid var(--green);opacity:.7}
+
+.c-oc-head{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 18px;border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,.015);
+}
+.c-oc-id{font-family:var(--ff-d);font-size:1.05rem;font-weight:700;color:var(--gold)}
+.c-oc-time{font-size:.7rem;color:var(--muted)}
+.c-oc-status{
+    padding:4px 12px;border-radius:20px;font-size:.7rem;font-weight:700;letter-spacing:1px;
+}
+.c-oc-status.st-new{background:rgba(200,164,90,.15);color:var(--gold);border:1px solid rgba(200,164,90,.3)}
+.c-oc-status.st-assigned{background:rgba(0,122,255,.15);color:#60aaff;border:1px solid rgba(0,122,255,.3)}
+.c-oc-status.st-done{background:rgba(52,199,89,.15);color:#5de87a;border:1px solid rgba(52,199,89,.3)}
+
+.c-oc-body{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.c-oc-info-row{display:flex;align-items:flex-start;gap:10px;font-size:.83rem;color:var(--muted);margin-bottom:8px}
+.c-oc-info-row i{color:var(--gold);min-width:14px;font-size:.8rem;margin-top:2px}
+.c-oc-info-row span,.c-oc-info-row a{color:var(--text);line-height:1.5}
+.c-map-link{color:var(--gold);display:inline-flex;align-items:center;gap:6px;font-size:.82rem;border-bottom:1px solid rgba(200,164,90,.3);transition:opacity .2s}
+.c-map-link:hover{opacity:.75}
+.c-items-list{display:flex;flex-direction:column;gap:5px}
+.c-item{
+    display:flex;justify-content:space-between;font-size:.79rem;
+    padding:6px 10px;background:rgba(255,255,255,.03);
+    border-radius:7px;border:1px solid var(--border);
+}
+.c-item-name{color:var(--text)}
+.c-item-price{color:var(--gold);font-weight:600}
+.c-total-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 12px;background:rgba(200,164,90,.06);
+    border:1px solid rgba(200,164,90,.15);border-radius:8px;margin-top:10px;
+    grid-column:1/-1;
+}
+.c-total-lbl{font-size:.7rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.c-total-val{font-family:var(--ff-d);font-size:1.1rem;color:var(--gold);font-weight:700}
+
+.c-oc-foot{
+    padding:12px 18px;border-top:1px solid var(--border);
+    display:flex;gap:10px;flex-wrap:wrap;
+    background:rgba(255,255,255,.01);
+}
+.c-done-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 22px;border-radius:var(--r-sm);
+    background:rgba(52,199,89,.12);border:1px solid rgba(52,199,89,.3);
+    color:#5de87a;font-family:var(--ff-b);font-size:.82rem;font-weight:700;
+    cursor:pointer;transition:all .25s;letter-spacing:.5px;flex:1;justify-content:center;
+}
+.c-done-btn:hover{background:rgba(52,199,89,.22);border-color:var(--green);transform:scale(1.02)}
+.c-call-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 18px;border-radius:var(--r-sm);
+    background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.25);
+    color:#60aaff;font-family:var(--ff-b);font-size:.82rem;font-weight:600;
+    cursor:pointer;transition:all .25s;text-decoration:none;
+}
+.c-call-btn:hover{background:rgba(0,122,255,.2);border-color:var(--blue)}
+.c-nav-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:10px 18px;border-radius:var(--r-sm);
+    background:rgba(200,164,90,.1);border:1px solid rgba(200,164,90,.25);
+    color:var(--gold-lt);font-family:var(--ff-b);font-size:.82rem;font-weight:600;
+    cursor:pointer;transition:all .25s;text-decoration:none;
+}
+.c-nav-btn:hover{background:rgba(200,164,90,.18);border-color:var(--gold)}
+
+/* ── NEW ORDER PULSE ── */
+@keyframes newPulse{0%,100%{box-shadow:0 0 0 0 rgba(200,164,90,.4)}50%{box-shadow:0 0 0 10px rgba(200,164,90,0)}}
+.c-order-card.is-new{animation:fadeUp .4s var(--ease) both, newPulse 2s 0.4s 3}
+
+/* ── EMPTY STATE ── */
+.c-empty{text-align:center;padding:80px 20px;color:var(--muted)}
+.c-empty i{font-size:3rem;opacity:.2;display:block;margin-bottom:16px}
+.c-empty p{font-size:.85rem;letter-spacing:2px;text-transform:uppercase}
+
+/* ── TOAST ── */
+.toast{
+    position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);
+    background:#0c1018;color:var(--text);padding:13px 22px;border-radius:30px;
+    font-family:var(--ff-b);font-size:.84rem;z-index:9000;
+    transition:transform .45s cubic-bezier(.34,1.56,.64,1);
+    border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.6);
+    white-space:nowrap;max-width:92vw;text-align:center;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── NEW ORDER NOTIFICATION ── */
+.new-order-toast{
+    position:fixed;top:80px;right:20px;z-index:8000;
+    background:var(--card);border:1px solid var(--gold);
+    border-radius:var(--r);padding:16px 20px;
+    max-width:300px;box-shadow:0 16px 48px rgba(0,0,0,.6);
+    transform:translateX(340px);transition:transform .45s var(--ease);
+}
+.new-order-toast.show{transform:translateX(0)}
+.not-title{font-weight:700;color:var(--gold);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.not-body{font-size:.8rem;color:var(--muted)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+    .c-oc-body{grid-template-columns:1fr}
+    .c-stats{grid-template-columns:1fr 1fr;gap:10px}
+    .c-stats .c-stat:last-child{grid-column:1/-1}
+    .courier-content{padding:20px 14px}
+    .courier-topbar{padding:0 14px}
+    .login-card{padding:36px 24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ LOGIN SCREEN ═══════ -->
+<div class="login-screen" id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo-top">QOPOQ</div>
+        <div class="login-logo-bot">SOMSA • KURYER</div>
+        <div class="login-icon"><i class="fas fa-motorcycle"></i></div>
+        <h2 class="login-title">Kuryer Panel</h2>
+        <p class="login-sub">O'zingizni tanlang va parolni kiriting</p>
+
+        <div class="login-kuryer-btns">
+            <button class="kuryer-sel-btn sel" id="btn-k1" onclick="selectKuryer(1)">
+                <i class="fas fa-motorcycle"></i> Kuryer 1
+            </button>
+            <button class="kuryer-sel-btn" id="btn-k2" onclick="selectKuryer(2)">
+                <i class="fas fa-motorcycle"></i> Kuryer 2
+            </button>
+        </div>
+
+        <label class="login-label" for="loginPw">Parol</label>
+        <input type="password" id="loginPw" class="login-input"
+               placeholder="Parolni kiriting"
+               onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="login-btn" onclick="doLogin()">
+            <i class="fas fa-sign-in-alt"></i> Kirish
+        </button>
+        <div class="login-err" id="loginErr"></div>
+    </div>
+</div>
+
+<!-- ═══════ COURIER PANEL ═══════ -->
+<div class="courier-panel" id="courierPanel">
+
+    <!-- TOP BAR -->
+    <div class="courier-topbar">
+        <div class="ct-logo">QOPOQ SOMSA</div>
+        <div class="ct-right">
+            <div class="ct-id-badge">
+                <i class="fas fa-motorcycle"></i>
+                <span id="ct-kuryer-name">Kuryer</span>
+            </div>
+            <div class="ct-badge-wrap">
+                <div class="ct-notif-dot" id="ct-notif-dot"></div>
+            </div>
+            <button class="ct-logout" onclick="doLogout()">
+                <i class="fas fa-sign-out-alt"></i> Chiqish
+            </button>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="courier-content">
+
+        <!-- STATS -->
+        <div class="c-stats">
+            <div class="c-stat gold">
+                <div class="c-stat-n" id="cs-assigned">0</div>
+                <div class="c-stat-l">Tayinlangan</div>
+            </div>
+            <div class="c-stat green">
+                <div class="c-stat-n" id="cs-done">0</div>
+                <div class="c-stat-l">Yetkazildi</div>
+            </div>
+            <div class="c-stat orange">
+                <div class="c-stat-n" id="cs-revenue">0</div>
+                <div class="c-stat-l">Jami so'm</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="c-tabs">
+            <button class="c-tab active" id="tab-active" onclick="switchTab('active',this)">
+                <i class="fas fa-clock"></i> Faol
+                <span class="tab-count" id="tc-active">0</span>
+            </button>
+            <button class="c-tab" id="tab-done" onclick="switchTab('done',this)">
+                <i class="fas fa-check-circle"></i> Yetkazildi
+            </button>
+        </div>
+
+        <!-- ORDER LIST -->
+        <div class="c-orders" id="c-order-list">
+            <div class="c-empty">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Yuklanmoqda...</p>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- NEW ORDER NOTIFICATION -->
+<div class="new-order-toast" id="newOrderToast">
+    <div class="not-title"><i class="fas fa-bell"></i> Yangi buyurtma!</div>
+    <div class="not-body" id="not-body">Sizga yangi buyurtma tayinlandi.</div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script type="module">
+import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue, update }
+    from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey:"AIzaSyCZdqBBYEoIXAqln8a9c801AT3G_I_ys4U",
+    authDomain:"shsh-120cf.firebaseapp.com",
+    databaseURL:"https://shsh-120cf-default-rtdb.firebaseio.com",
+    projectId:"shsh-120cf",
+    storageBucket:"shsh-120cf.firebasestorage.app",
+    messagingSenderId:"897260945183",
+    appId:"1:897260945183:web:6e6fd385b1718ed00afa2a"
+};
+
+// PAROLLAR — xohlasangiz o'zgartirasiz
+const PASSWORDS = { kuryer1: "1111", kuryer2: "2222" };
+
+const app      = initializeApp(firebaseConfig);
+const db       = getDatabase(app);
+const ordersRef= ref(db, 'orders');
+
+let currentKuryer = 'kuryer1';
+let allOrders     = {};
+let currentTab    = 'active';
+let isLoggedIn    = false;
+let prevMyOrders  = new Set();
+
+// ── Kuryer selection ──
+window.selectKuryer = function(n) {
+    currentKuryer = 'kuryer' + n;
+    document.getElementById('btn-k1').classList.toggle('sel', n===1);
+    document.getElementById('btn-k2').classList.toggle('sel', n===2);
+};
+
+// ── Login ──
+window.doLogin = function() {
+    const pw  = document.getElementById('loginPw').value;
+    const err = document.getElementById('loginErr');
+    if (pw === PASSWORDS[currentKuryer]) {
+        isLoggedIn = true;
+        err.textContent = '';
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('courierPanel').style.display = 'block';
+        document.getElementById('ct-kuryer-name').textContent =
+            currentKuryer === 'kuryer1' ? 'Kuryer 1' : 'Kuryer 2';
+        toast('✅ Xush kelibsiz!');
+    } else {
+        err.textContent = '❌ Parol noto\'g\'ri!';
+        document.getElementById('loginPw').value = '';
+        document.getElementById('loginPw').focus();
+    }
+};
+
+window.doLogout = function() {
+    isLoggedIn = false;
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('courierPanel').style.display = 'none';
+    document.getElementById('loginPw').value = '';
+};
+
+// ── Tab switch ──
+window.switchTab = function(tab, btn) {
+    currentTab = tab;
+    document.querySelectorAll('.c-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderOrders();
+};
+
+// ── Firebase listener ──
+onValue(ordersRef, snap => {
+    allOrders = snap.val() || {};
+    if (isLoggedIn) {
+        checkNewOrders();
+        updateStats();
+        renderOrders();
+    }
+});
+
+function getMyOrders() {
+    return Object.entries(allOrders)
+        .map(([k,v]) => ({_key:k,...v}))
+        .filter(o => o.courier === currentKuryer)
+        .sort((a,b) => b.createdAt - a.createdAt);
+}
+
+function checkNewOrders() {
+    const mine = getMyOrders().filter(o => o.status === 'tayinlandi');
+    mine.forEach(o => {
+        if (!prevMyOrders.has(o._key)) {
+            showNewOrderNotif(o);
+            prevMyOrders.add(o._key);
+        }
+    });
+    // update dot
+    const active = getMyOrders().filter(o => o.status === 'tayinlandi').length;
+    const dot = document.getElementById('ct-notif-dot');
+    dot.classList.toggle('show', active > 0);
+}
+
+function showNewOrderNotif(o) {
+    const el = document.getElementById('newOrderToast');
+    document.getElementById('not-body').textContent =
+        `${o.shortId||'#'+String(o.id).slice(-5)} — ${Number(o.total).toLocaleString()} so'm`;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 5000);
+    // browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🚴 Yangi buyurtma!', {
+            body: `${o.tel} — ${Number(o.total).toLocaleString()} so'm`,
+            icon: ''
+        });
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
+}
+
+function updateStats() {
+    const mine = getMyOrders();
+    const assigned = mine.filter(o => o.status === 'tayinlandi').length;
+    const done     = mine.filter(o => o.status === 'yetkazildi').length;
+    const revenue  = mine.filter(o => o.status === 'yetkazildi')
+                         .reduce((s,o) => s + Number(o.total||0), 0);
+    document.getElementById('cs-assigned').textContent = assigned;
+    document.getElementById('cs-done').textContent     = done;
+    document.getElementById('cs-revenue').textContent  = revenue.toLocaleString();
+
+    const activeCount = mine.filter(o => o.status === 'tayinlandi').length;
+    document.getElementById('tc-active').textContent = activeCount;
+}
+
+function renderOrders() {
+    const container = document.getElementById('c-order-list');
+    let mine = getMyOrders();
+
+    if (currentTab === 'active') {
+        mine = mine.filter(o => o.status === 'tayinlandi' || o.status === 'yangi');
+    } else {
+        mine = mine.filter(o => o.status === 'yetkazildi');
+    }
+
+    if (mine.length === 0) {
+        container.innerHTML = `
+            <div class="c-empty">
+                <i class="fas fa-inbox"></i>
+                <p>${currentTab==='active' ? "Hozircha faol buyurtma yo'q" : "Yetkazilgan buyurtmalar yo'q"}</p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = mine.map((o,idx) => orderCardHTML(o, idx)).join('');
+}
+
+function orderCardHTML(o, idx) {
+    const items = JSON.parse(o.items || '[]');
+    const time  = new Date(o.createdAt).toLocaleString('uz-UZ');
+    const sid   = o.shortId || ('#' + String(o.id).slice(-5));
+
+    const locHTML = o.isGPS && o.mapLink
+        ? `<a href="${o.mapLink}" target="_blank" class="c-map-link"><i class="fas fa-map-marker-alt"></i> Xaritada ko'rish</a>`
+        : `<span>${o.manzil}</span>`;
+
+    const stMap = {
+        yangi:      { text:'🆕 Yangi',      cls:'st-new' },
+        tayinlandi: { text:'🚴 Tayinlandi', cls:'st-assigned' },
+        yetkazildi: { text:'✅ Yetkazildi', cls:'st-done' }
+    };
+    const st = stMap[o.status] || { text:o.status, cls:'' };
+
+    const isNew = idx < 3 && o.status === 'tayinlandi';
+    const footerBtns = o.status !== 'yetkazildi' ? `
+        <a href="tel:${o.tel}" class="c-call-btn"><i class="fas fa-phone-alt"></i> Qo'ng'iroq</a>
+        ${o.isGPS && o.mapLink ? `<a href="${o.mapLink}" target="_blank" class="c-nav-btn"><i class="fas fa-navigation"></i> Navigatsiya</a>` : ''}
+        <button class="c-done-btn" onclick="markDelivered('${o._key}')">
+            <i class="fas fa-check-circle"></i> Yetkazib berdim
+        </button>` : '';
+
+    return `
+    <div class="c-order-card status-${o.status}${isNew?' is-new':''}" data-key="${o._key}">
+        <div class="c-oc-head">
+            <div>
+                <span class="c-oc-id">${sid}</span>
+                <div class="c-oc-time">${time}</div>
+            </div>
+            <span class="c-oc-status ${st.cls}">${st.text}</span>
+        </div>
+        <div class="c-oc-body">
+            <div>
+                <div class="c-oc-info-row"><i class="fas fa-phone-alt"></i><span>${o.tel}</span></div>
+                <div class="c-oc-info-row"><i class="fas fa-map-marker-alt"></i>${locHTML}</div>
+            </div>
+            <div>
+                <div class="c-items-list">
+                    ${items.map(i => `
+                    <div class="c-item">
+                        <span class="c-item-name">${i.name} ×${i.qty}</span>
+                        <span class="c-item-price">${(i.price*i.qty).toLocaleString()} so'm</span>
+                    </div>`).join('')}
+                </div>
+            </div>
+            <div class="c-total-row">
+                <span class="c-total-lbl">Jami to'lov</span>
+                <span class="c-total-val">${Number(o.total).toLocaleString()} so'm</span>
+            </div>
+        </div>
+        ${footerBtns ? `<div class="c-oc-foot">${footerBtns}</div>` : ''}
+    </div>`;
+}
+
+window.markDelivered = async function(key) {
+    if (!confirm("Buyurtmani yetkazib berdingizmi?")) return;
+    await update(ref(db, 'orders/' + key), { status: 'yetkazildi' });
+    toast("✅ Buyurtma yetkazildi deb belgilandi!");
+};
+
+// ── Toast ──
+window.toast = function(msg, type='ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.style.borderColor = type==='warn'?'rgba(255,180,0,.38)':'rgba(200,164,90,.3)';
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3000);
+};
+</script>
+</body>
+</html>
