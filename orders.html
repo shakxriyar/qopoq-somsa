@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Buyurtmalarim | QOPOQ SOMSA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #05070b;
+            --bg2: #080b10;
+            --card: #0c1018;
+            --card-h: #111720;
+            --gold: #c8a45a;
+            --gold-lt: #e0c27c;
+            --gold-dk: #9a7b42;
+            --gold-glow: rgba(200,164,90,.18);
+            --text: #eaf0f9;
+            --muted: #7a8fa6;
+            --border: rgba(200,164,90,.13);
+            --border-h: rgba(200,164,90,.38);
+            --grad: linear-gradient(135deg, #c8a45a 0%, #9a7b42 100%);
+            --ff-d: 'Cormorant Garamond', Georgia, serif;
+            --ff-b: 'Outfit', system-ui, sans-serif;
+            --ease: cubic-bezier(.4,0,.2,1);
+            --r: 16px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--ff-b);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::after {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.035'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 9999; opacity: .45;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: sticky; top: 0; left: 0; right: 0;
+            height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%;
+            background: rgba(5,7,11,.92);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+        }
+        .logo { text-decoration: none; display: flex; flex-direction: column; line-height: 1; gap: 2px; }
+        .logo-top { font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700; color: var(--gold); letter-spacing: 6px; }
+        .logo-bot { font-family: var(--ff-d); font-size: .6rem; font-weight: 400; color: var(--muted); letter-spacing: 8px; }
+        .back-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(200,164,90,.1); border: 1px solid var(--border);
+            color: var(--gold); padding: 8px 16px; border-radius: 50px;
+            font-size: .85rem; font-family: var(--ff-b); cursor: pointer;
+            text-decoration: none; transition: all .3s var(--ease);
+        }
+        .back-btn:hover { background: rgba(200,164,90,.2); border-color: var(--border-h); }
+
+        /* MAIN */
+        .main {
+            max-width: 700px; margin: 0 auto;
+            padding: 32px 16px 80px;
+        }
+        .page-title {
+            font-family: var(--ff-d); font-size: 2rem; font-weight: 700;
+            color: var(--gold); letter-spacing: 3px; text-align: center;
+            margin-bottom: 8px;
+        }
+        .page-sub {
+            text-align: center; color: var(--muted); font-size: .88rem;
+            margin-bottom: 32px;
+        }
+
+        /* SEARCH BOX */
+        .search-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 24px;
+            margin-bottom: 28px;
+        }
+        .search-label {
+            font-size: .8rem; letter-spacing: 2px; color: var(--muted);
+            text-transform: uppercase; margin-bottom: 12px; display: block;
+        }
+        .tel-input-wrap {
+            display: flex; gap: 10px;
+        }
+        .tel-input {
+            flex: 1;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-family: var(--ff-b);
+            font-size: 1rem;
+            padding: 14px 18px;
+            outline: none;
+            transition: border-color .3s var(--ease);
+            -webkit-appearance: none;
+        }
+        .tel-input:focus { border-color: var(--gold); }
+        .tel-input::placeholder { color: var(--muted); }
+        .search-btn {
+            background: var(--grad);
+            border: none; border-radius: 12px;
+            color: #1a1000; font-family: var(--ff-b);
+            font-size: .9rem; font-weight: 600;
+            padding: 14px 22px; cursor: pointer;
+            white-space: nowrap;
+            transition: opacity .3s;
+            display: flex; align-items: center; gap: 7px;
+        }
+        .search-btn:hover { opacity: .88; }
+        .search-btn:active { opacity: .7; }
+
+        /* ORDERS LIST */
+        #orders-container { display: flex; flex-direction: column; gap: 16px; }
+
+        .ord-empty {
+            text-align: center; padding: 60px 20px; color: var(--muted);
+        }
+        .ord-empty i { font-size: 3rem; opacity: .2; margin-bottom: 16px; display: block; }
+        .ord-empty p { font-size: .9rem; letter-spacing: 1px; }
+
+        /* ORDER CARD */
+        .ord-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            animation: fadeUp .4s var(--ease) both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .ord-card-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap; gap: 8px;
+        }
+        .ord-id-group { display: flex; flex-direction: column; gap: 2px; }
+        .ord-id { font-family: var(--ff-d); font-size: 1.15rem; font-weight: 700; color: var(--gold); }
+        .ord-time { font-size: .75rem; color: var(--muted); }
+
+        /* STATUS BADGES */
+        .ord-status {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 14px; border-radius: 50px;
+            font-size: .8rem; font-weight: 600; letter-spacing: .5px;
+        }
+        .st-new      { background: rgba(100,180,255,.12); color: #64b4ff; border: 1px solid rgba(100,180,255,.25); }
+        .st-assigned { background: rgba(255,160,50,.12);  color: #ffa032; border: 1px solid rgba(255,160,50,.25); }
+        .st-done     { background: rgba(80,220,120,.12);  color: #50dc78; border: 1px solid rgba(80,220,120,.25); }
+        .st-cancel   { background: rgba(255,80,80,.12);   color: #ff5050; border: 1px solid rgba(255,80,80,.25); }
+
+        /* STATUS TRACKER */
+        .ord-tracker {
+            padding: 20px 18px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .tracker-steps {
+            display: flex; align-items: center;
+            gap: 0;
+        }
+        .tr-step {
+            display: flex; flex-direction: column; align-items: center;
+            flex: 1; position: relative; gap: 8px;
+        }
+        .tr-circle {
+            width: 34px; height: 34px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .85rem;
+            border: 2px solid rgba(255,255,255,.1);
+            background: var(--bg2);
+            color: var(--muted);
+            transition: all .4s var(--ease);
+            position: relative; z-index: 2;
+        }
+        .tr-step.active .tr-circle {
+            border-color: var(--gold); color: var(--gold);
+            background: rgba(200,164,90,.1);
+            box-shadow: 0 0 16px rgba(200,164,90,.25);
+        }
+        .tr-step.done .tr-circle {
+            border-color: #50dc78; color: #fff;
+            background: #50dc78;
+        }
+        .tr-step.cancelled .tr-circle {
+            border-color: #ff5050; color: #fff;
+            background: #ff5050;
+        }
+        .tr-label { font-size: .7rem; color: var(--muted); text-align: center; line-height: 1.2; }
+        .tr-step.active .tr-label { color: var(--gold); }
+        .tr-step.done .tr-label { color: #50dc78; }
+        .tr-step.cancelled .tr-label { color: #ff5050; }
+
+        .tr-line {
+            flex: 1; height: 2px;
+            background: rgba(255,255,255,.08);
+            margin-top: -17px; margin-bottom: 23px;
+            position: relative; z-index: 1;
+            transition: background .4s;
+        }
+        .tr-line.done { background: #50dc78; }
+        .tr-line.active { background: var(--gold); }
+
+        /* ORDER BODY */
+        .ord-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+
+        .ord-row {
+            display: flex; align-items: flex-start; gap: 10px;
+            font-size: .88rem; color: var(--muted);
+        }
+        .ord-row i { color: var(--gold); margin-top: 2px; min-width: 14px; }
+        .ord-row span { color: var(--text); }
+        .ord-row a { color: var(--gold); text-decoration: none; }
+
+        .ord-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+        .ord-item-chip {
+            background: rgba(200,164,90,.08);
+            border: 1px solid var(--border);
+            border-radius: 50px; padding: 4px 12px;
+            font-size: .78rem; color: var(--gold-lt);
+        }
+
+        .ord-total {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 1rem; font-weight: 600; color: var(--gold);
+            padding-top: 8px;
+            border-top: 1px solid var(--border);
+            margin-top: 4px;
+        }
+
+        /* COURIER INFO */
+        .ord-courier {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,160,50,.06);
+            border: 1px solid rgba(255,160,50,.15);
+            border-radius: 10px; padding: 10px 14px;
+            font-size: .85rem; color: #ffa032;
+        }
+
+        /* LOADING */
+        .loading-wrap {
+            text-align: center; padding: 50px;
+            color: var(--muted); font-size: .9rem;
+        }
+        .spinner {
+            display: inline-block; width: 28px; height: 28px;
+            border: 3px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--card); border: 1px solid var(--border);
+            color: var(--text); padding: 12px 24px; border-radius: 50px;
+            font-size: .88rem; opacity: 0; transition: all .3s var(--ease);
+            z-index: 9000; white-space: nowrap; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .main { padding: 20px 12px 60px; }
+            .page-title { font-size: 1.6rem; }
+            .tel-input-wrap { flex-direction: column; }
+            .search-btn { width: 100%; justify-content: center; }
+            .tr-label { font-size: .62rem; }
+            .tr-circle { width: 28px; height: 28px; font-size: .75rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="index.html" class="logo">
+        <span class="logo-top">QOPOQ</span>
+        <span class="logo-bot">SOMSA</span>
+    </a>
+    <a href="index.html" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Orqaga
+    </a>
+</nav>
+
+<main class="main">
+    <h1 class="page-title">Buyurtmalarim</h1>
+    <p class="page-sub">Telefon raqamingizni kiriting va buyurtmangiz holatini ko'ring</p>
+
+    <div class="search-section">
+        <span class="search-label"><i class="fas fa-search"></i> &nbsp; Telefon raqam bilan qidiring</span>
+        <div class="tel-input-wrap">
+            <input type="tel" id="tel-search" class="tel-input"
+                   placeholder="+998 90 123 45 67"
+                   oninput="formatTel(this)"
+                   onkeydown="if(event.key==='Enter') searchOrders()">
+            <button class="search-btn" onclick="searchOrders()">
+                <i class="fas fa-search"></i> Qidirish
+            </button>
+        </div>
+    </div>
+
+    <div id="orders-container">
+        <div class="ord-empty">
+            <i class="fas fa-receipt"></i>
+            <p>Buyurtmalarni ko'rish uchun<br>telefon raqamingizni kiriting</p>
+        </div>
+    </div>
+</main>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCZdqBBYEoIXAqln8a9c801AT3G_I_ys4U",
+    authDomain: "shsh-120cf.firebaseapp.com",
+    databaseURL: "https://shsh-120cf-default-rtdb.firebaseio.com",
+    projectId: "shsh-120cf",
+    storageBucket: "shsh-120cf.firebasestorage.app",
+    messagingSenderId: "897260945183",
+    appId: "1:897260945183:web:6e6fd385b1718ed00afa2a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+let allOrders = {};
+
+onValue(ref(db, 'orders'), snap => {
+    allOrders = snap.val() || {};
+    // Auto-refresh if already searched
+    const currentTel = document.getElementById('tel-search').value.trim();
+    if (currentTel.length > 6) renderOrders(currentTel);
+});
+
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+window.formatTel = function(el) {
+    let v = el.value.replace(/[^\d+]/g, '');
+    if (v.length === 0) { el.value = '+998'; return; }
+    if (!v.startsWith('+998')) {
+        if (v.startsWith('+')) v = '+998' + v.slice(1).replace(/\D/g,'');
+        else if (v.startsWith('998')) v = '+' + v;
+        else if (v.startsWith('0')) v = '+998' + v.slice(1);
+        else v = '+998' + v;
+    }
+    el.value = v;
+};
+
+// Set default prefix on focus
+document.getElementById('tel-search').addEventListener('focus', function() {
+    if (!this.value) this.value = '+998';
+});
+
+window.searchOrders = function() {
+    const rawTel = document.getElementById('tel-search').value.trim();
+    if (rawTel.length < 7) {
+        toast("⚠️ Telefon raqamingizni to'liq kiriting");
+        return;
+    }
+    renderOrders(rawTel);
+};
+
+function renderOrders(tel) {
+    const container = document.getElementById('orders-container');
+
+    const matched = Object.entries(allOrders)
+        .map(([k, v]) => ({ _key: k, ...v }))
+        .filter(o => {
+            const a = (o.tel || '').replace(/\s/g,'');
+            const b = tel.replace(/\s/g,'');
+            return a === b || a.endsWith(b) || b.endsWith(a);
+        })
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+    if (matched.length === 0) {
+        container.innerHTML = `
+            <div class="ord-empty">
+                <i class="fas fa-search"></i>
+                <p>Bu raqam bilan buyurtma topilmadi.<br><span style="font-size:.8rem;opacity:.6">Raqamni to'g'ri kiriting</span></p>
+            </div>`;
+        return;
+    }
+
+    container.innerHTML = matched.map((o, idx) => {
+        const items   = JSON.parse(o.items || '[]');
+        const time    = new Date(o.createdAt).toLocaleString('uz-UZ');
+        const stMap   = {
+            yangi:      { txt: '🆕 Yangi',      cls: 'st-new' },
+            tayinlandi: { txt: '🚴 Yetkazilmoqda', cls: 'st-assigned' },
+            yetkazildi: { txt: '✅ Yetkazildi', cls: 'st-done' },
+            bekor:      { txt: '❌ Bekor',       cls: 'st-cancel' }
+        };
+        const st = stMap[o.status] || { txt: o.status, cls: '' };
+
+        const loc = o.isGPS && o.mapLink
+            ? `<a href="${o.mapLink}" target="_blank"><i class="fas fa-location-dot"></i> Xaritada ko'rish</a>`
+            : `<span>${o.manzil || '—'}</span>`;
+
+        const courierText = o.courier === 'kuryer1' ? '🧑 Kuryer 1' :
+                            o.courier === 'kuryer2' ? '🧑 Kuryer 2' : null;
+
+        // Tracker
+        const isCancelled = o.status === 'bekor';
+        const s1 = 'done';
+        const s2 = o.status === 'yangi' ? '' : (o.status === 'bekor' ? 'cancelled' : 'done');
+        const s3 = o.status === 'yetkazildi' ? 'done' : (o.status === 'bekor' ? 'cancelled' : (o.status === 'tayinlandi' ? 'active' : ''));
+        const s4 = o.status === 'yetkazildi' ? 'done' : '';
+        const l1 = (s2 === 'done' || s2 === 'cancelled') ? (isCancelled ? 'active' : 'done') : '';
+        const l2 = (s3 === 'done') ? 'done' : (s3 === 'active' ? 'active' : '');
+        const l3 = s4 === 'done' ? 'done' : '';
+
+        return `
+        <div class="ord-card" style="animation-delay:${idx * 80}ms">
+            <div class="ord-card-head">
+                <div class="ord-id-group">
+                    <span class="ord-id">${o.shortId || ('#' + String(o.id).slice(-5))}</span>
+                    <span class="ord-time"><i class="fas fa-clock" style="font-size:.7rem"></i> ${time}</span>
+                </div>
+                <span class="ord-status ${st.cls}">${st.txt}</span>
+            </div>
+
+            <div class="ord-tracker">
+                <div class="tracker-steps">
+                    <div class="tr-step done">
+                        <div class="tr-circle"><i class="fas fa-check"></i></div>
+                        <span class="tr-label">Qabul<br>qilindi</span>
+                    </div>
+                    <div class="tr-line ${l1}"></div>
+                    <div class="tr-step ${s2 || (isCancelled ? 'cancelled' : '')}">
+                        <div class="tr-circle"><i class="fas fa-${isCancelled ? 'times' : 'utensils'}"></i></div>
+                        <span class="tr-label">${isCancelled ? 'Bekor<br>qilindi' : 'Tayyorlan<br>moqda'}</span>
+                    </div>
+                    ${!isCancelled ? `
+                    <div class="tr-line ${l2}"></div>
+                    <div class="tr-step ${s3}">
+                        <div class="tr-circle"><i class="fas fa-motorcycle"></i></div>
+                        <span class="tr-label">Yetkazil<br>moqda</span>
+                    </div>
+                    <div class="tr-line ${l3}"></div>
+                    <div class="tr-step ${s4}">
+                        <div class="tr-circle"><i class="fas fa-${s4==='done'?'check':'home'}"></i></div>
+                        <span class="tr-label">Yetkazil<br>di</span>
+                    </div>` : ''}
+                </div>
+            </div>
+
+            <div class="ord-body">
+                <div class="ord-row">
+                    <i class="fas fa-map-marker-alt"></i>
+                    ${loc}
+                </div>
+                <div class="ord-items">
+                    ${items.map(i => `<span class="ord-item-chip">${i.name} ×${i.qty}</span>`).join('')}
+                </div>
+                ${courierText ? `
+                <div class="ord-courier">
+                    <i class="fas fa-motorcycle"></i>
+                    <span>${courierText} yetkazmoqda</span>
+                </div>` : ''}
+                <div class="ord-total">
+                    <i class="fas fa-coins"></i>
+                    Jami: ${Number(o.total).toLocaleString()} so'm
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+</script>
+</body>
+</html>
