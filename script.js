@@ -310,8 +310,23 @@ window.orderGoBack = function(fromStep) {
 
 window.formatTelInput = function(el) {
     let v = el.value.replace(/[^\d+]/g, '');
-    if (v.length > 0 && v[0] !== '+') v = '+' + v;
+    // Ensure always starts with +998
+    if (v === '' || v === '+') { el.value = '+998'; return; }
+    if (!v.startsWith('+998')) {
+        if (v.startsWith('+')) v = '+998' + v.slice(1).replace(/\D/g,'');
+        else if (v.startsWith('998')) v = '+' + v;
+        else if (v.startsWith('0')) v = '+998' + v.slice(1);
+        else v = '+998' + v.replace(/\D/g,'');
+    }
+    // Limit to +998 XX XXX XX XX (13 chars)
+    if (v.length > 13) v = v.slice(0, 13);
     el.value = v;
+};
+
+window.initTelPrefix = function(el) {
+    if (!el.value || el.value.trim() === '') {
+        el.value = '+998';
+    }
 };
 
 window.orderStep1Next = function() {
