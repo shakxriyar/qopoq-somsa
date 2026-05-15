@@ -11,7 +11,6 @@
 </head>
 <body>
 
-<!-- ═══════ NAVBAR ═══════ -->
 <nav class="navbar">
     <a href="index.html" class="logo">
         <span class="logo-top">QOPOQ</span>
@@ -29,7 +28,6 @@
     </div>
 </nav>
 
-<!-- ═══════ HERO ═══════ -->
 <header class="hero">
     <div class="hero-grain"></div>
     <div class="hero-glow"></div>
@@ -52,7 +50,6 @@
     </div>
 </header>
 
-<!-- ═══════ MENU SECTION ═══════ -->
 <section class="menu-section">
     <div class="sec-head">
         <div class="sec-line"></div>
@@ -62,7 +59,6 @@
     <div id="menuList" class="menu"></div>
 </section>
 
-<!-- ═══════ PRODUCT MODAL ═══════ -->
 <div id="productModal" class="modal-overlay" onclick="closeModalOutside(event)">
     <div class="modal-card">
         <button class="modal-x" onclick="closeModal()"><i class="fas fa-times"></i></button>
@@ -110,7 +106,6 @@
     </div>
 </div>
 
-<!-- ═══════ CART PANEL ═══════ -->
 <div class="cart-backdrop" id="cart-backdrop" onclick="toggleCart()"></div>
 <div id="cartPanel" class="cart-panel">
     <div class="cart-head">
@@ -129,7 +124,6 @@
     </div>
 </div>
 
-<!-- ═══════ ADMIN PANEL ═══════ -->
 <div id="admin-box">
     <div id="admin-drag-header">
         <span class="adm-title"><i class="fas fa-crown"></i> Admin Panel</span>
@@ -159,11 +153,9 @@
     </div>
 </div>
 
-<!-- ═══════ ORDER MODAL (2-step) ═══════ -->
 <div class="order-overlay" id="orderOverlay" onclick="orderOverlayClose(event)">
     <div class="order-sheet" id="orderSheet">
 
-        <!-- Progress dots -->
         <div class="order-progress">
             <span class="order-dot active" id="odot-1"></span>
             <span class="order-dot" id="odot-2"></span>
@@ -171,7 +163,6 @@
         </div>
         <button class="order-x" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
 
-        <!-- ── STEP 1: TELEFON ── -->
         <div class="order-step" id="ostep-1">
             <div class="order-icon-title">
                 <span class="order-icon-wrap"><i class="fas fa-phone-alt"></i></span>
@@ -186,7 +177,6 @@
             </button>
         </div>
 
-        <!-- ── STEP 2: MANZIL ── -->
         <div class="order-step hidden" id="ostep-2">
             <div class="order-icon-title">
                 <span class="order-icon-wrap"><i class="fas fa-map-marker-alt"></i></span>
@@ -206,7 +196,6 @@
             </button>
         </div>
 
-        <!-- ── STEP 3: TASDIQLASH ── -->
         <div class="order-step hidden" id="ostep-3">
             <div class="order-icon-title">
                 <span class="order-icon-wrap order-icon-check"><i class="fas fa-check-circle"></i></span>
@@ -237,10 +226,8 @@
     </div>
 </div>
 
-<!-- ═══════ TOAST ═══════ -->
 <div id="toast" class="toast"></div>
 
-<!-- ═══════ FOOTER ═══════ -->
 <footer class="premium-footer">
     <div class="footer-top-ornament">
         <div class="foot-line"></div>
@@ -274,10 +261,9 @@
         </div>
     </div>
     <div class="copyright" onclick="handleAdmin()">
-        © 2026 QOPOQ SOMSA Premium. Barcha huquqlar himoyalangan.
+       © 2026 QOPOQ SOMSA Premium. Barcha huquqlar himoyalangan.
     </div>
 </footer>
-
 <script type="module" src="./script.js"></script>
 </body>
 </html>
