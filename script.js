@@ -1,7 +1,7 @@
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getDatabase, ref, push, set,
-    onValue, remove, get
+    onValue, remove, get, update
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 /* ══════════════════════════════════════════
@@ -20,11 +20,35 @@ const firebaseConfig = {
 const app         = initializeApp(firebaseConfig);
 const db          = getDatabase(app);
 const productsRef = ref(db, 'products');
-const salesRef    = ref(db, 'popularity'); // tracks how many times each product was ordered
+const salesRef    = ref(db, 'popularity');
+const ordersRef   = ref(db, 'orders');
 
 const BOT_TOKEN  = "8271852367:AAGKDNXPaVU-HKZjLaGfCgoKK1DI421XbzY";
 const ADMIN_ID   = "8030496668";
-const KURYER_ID  = "7312694067";
+const KURYER1_ID = "7312694067";
+const KURYER2_ID = "111";
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function isGPSCoords(str) {
+    return /^-?\d+\.?\d*,\s*-?\d+\.?\d*$/.test((str || '').trim());
+}
+
+function getMapLink(coords) {
+    const parts = coords.split(',').map(s => s.trim());
+    return `https://maps.google.com/maps?q=${parts[0]},${parts[1]}`;
+}
+
+async function sendTelegram(chatId, text) {
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' })
+        });
+    } catch(e) { console.warn('Telegram xato:', e); }
+}
 
 /* ══════════════════════════════════════════
    STATE
@@ -32,10 +56,10 @@ const KURYER_ID  = "7312694067";
 window.products     = [];
 window.cart         = JSON.parse(localStorage.getItem('qopoq_cart_v3')) || [];
 window.isAdmin      = false;
-window.popularity   = {};   // { productId: count }
+window.popularity   = {};
 
 let adminClicks   = 0;
-let modalProdId   = null;   // currently opened product in modal
+let modalProdId   = null;
 let modalQty      = 1;
 
 /* ══════════════════════════════════════════
@@ -55,6 +79,13 @@ onValue(productsRef, snap => {
 onValue(salesRef, snap => {
     window.popularity = snap.val() || {};
     window.renderMenu();
+});
+
+// Real-time orders listener for site admin panel
+onValue(ordersRef, snap => {
+    const data = snap.val() || {};
+    window.allOrders = data;
+    renderSiteOrders();
 });
 
 /* ══════════════════════════════════════════
@@ -195,11 +226,9 @@ window.changeQty = function(id, delta) {
 window.updateCart = function() {
     localStorage.setItem('qopoq_cart_v3', JSON.stringify(window.cart));
 
-    // Badge
     const badge = document.getElementById('cart-badge');
     if (badge) badge.textContent = window.cart.reduce((s, i) => s + i.qty, 0);
 
-    // Cart list
     const cartList = document.getElementById('cart-list');
     const totalEl  = document.getElementById('total-price');
     if (!cartList) return;
@@ -247,8 +276,6 @@ window.toggleCart = function() {
 /* ══════════════════════════════════════════
    CHECKOUT — MODAL FLOW
 ══════════════════════════════════════════ */
-
-// Open the order modal (called from cart panel button)
 window.checkout = function() {
     if (window.cart.length === 0) { toast("⚠️ Savat bo'sh!", 'warn'); return; }
     orderShowStep(1);
@@ -272,8 +299,8 @@ function orderShowStep(n) {
         if (!s || !d) return;
         s.classList.toggle('hidden', i !== n);
         d.classList.remove('active', 'done');
-        if (i === n)     d.classList.add('active');
-        if (i < n)       d.classList.add('done');
+        if (i === n)  d.classList.add('active');
+        if (i < n)    d.classList.add('done');
     });
 }
 
@@ -282,7 +309,6 @@ window.orderGoBack = function(fromStep) {
 };
 
 window.formatTelInput = function(el) {
-    // Keep only digits and + sign
     let v = el.value.replace(/[^\d+]/g, '');
     if (v.length > 0 && v[0] !== '+') v = '+' + v;
     el.value = v;
@@ -306,9 +332,8 @@ window.orderStep2Next = function() {
         document.getElementById('order-manzil').focus();
         return;
     }
-    // populate confirm step
-    const tel   = document.getElementById('order-tel').value.trim();
-    let jami = 0;
+    const tel  = document.getElementById('order-tel').value.trim();
+    let jami   = 0;
     window.cart.forEach(i => { jami += i.price * i.qty; });
 
     document.getElementById('ocr-tel').textContent    = tel;
@@ -323,14 +348,14 @@ window.getGPS = function() {
         return;
     }
     const btn = document.querySelector('.order-gps-btn');
-    if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aniqlanmoqda...'; }
+    if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aniqlanmoqda...';
 
     navigator.geolocation.getCurrentPosition(
         pos => {
             const lat = pos.coords.latitude.toFixed(6);
             const lng = pos.coords.longitude.toFixed(6);
-            document.getElementById('order-manzil').value = `${lat}, ${lng}`;
-            if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> GPS manzil olindi'; }
+            document.getElementById('order-manzil').value = `${lat},${lng}`;
+            if (btn) btn.innerHTML = '<i class="fas fa-check"></i> GPS manzil olindi';
             setTimeout(() => {
                 if (btn) btn.innerHTML = '<i class="fas fa-crosshairs"></i> GPS lokatsiyani olish';
             }, 2500);
@@ -342,37 +367,71 @@ window.getGPS = function() {
     );
 };
 
-window.sendOrder = function() {
+window.sendOrder = async function() {
     const tel    = document.getElementById('order-tel').value.trim();
     const manzil = document.getElementById('order-manzil').value.trim();
-
-    let msg  = `🥟 YANGI BUYURTMA — QOPOQ SOMSA\n`;
-    msg     += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    msg     += `📞 Telefon: ${tel}\n`;
-    msg     += `📍 Manzil:  ${manzil}\n`;
-    msg     += `━━━━━━━━━━━━━━━━━━━━━\n`;
+    const isGPS  = isGPSCoords(manzil);
+    const mapLink = isGPS ? getMapLink(manzil) : null;
 
     let jami = 0;
-    window.cart.forEach(i => {
-        msg  += `• ${i.name} × ${i.qty} = ${(i.price * i.qty).toLocaleString()} so'm\n`;
+    const items = window.cart.map(i => {
         jami += i.price * i.qty;
+        return { name: i.name, qty: i.qty, price: i.price };
+    });
 
+    const orderNum = Date.now();
+    const shortId  = '#' + String(orderNum).slice(-5);
+
+    const orderData = {
+        id:        orderNum,
+        shortId,
+        tel,
+        manzil,
+        isGPS,
+        lat:       isGPS ? parseFloat(manzil.split(',')[0]) : null,
+        lng:       isGPS ? parseFloat(manzil.split(',')[1]) : null,
+        mapLink:   mapLink || null,
+        items:     JSON.stringify(items),
+        total:     jami,
+        status:    'yangi',
+        courier:   null,
+        createdAt: orderNum
+    };
+
+    await push(ordersRef, orderData);
+
+    // Popularity update
+    for (const i of items) {
         const pRef = ref(db, 'popularity/' + i.id);
-        get(pRef).then(snap => {
-            set(pRef, (snap.val() || 0) + i.qty);
-        });
-    });
+        const snap = await get(pRef);
+        await set(pRef, (snap.val() || 0) + i.qty);
+    }
 
-    msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
-    msg += `💰 JAMI: ${jami.toLocaleString()} so'm`;
+    // Build Telegram message
+    const itemsText = items.map(i =>
+        `• ${i.name} × ${i.qty} = ${(i.price * i.qty).toLocaleString()} so'm`
+    ).join('\n');
 
-    [ADMIN_ID, KURYER_ID].forEach(cid => {
-        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ chat_id: cid, text: msg })
-        });
-    });
+    const locationText = isGPS && mapLink
+        ? `📍 <b>Lokatsiya (GPS):</b> <a href="${mapLink}">Xaritada ko'rish</a>`
+        : `📍 <b>Manzil:</b> ${manzil}`;
+
+    const msg =
+`🥟 <b>YANGI BUYURTMA — QOPOQ SOMSA</b>
+━━━━━━━━━━━━━━━━━━━━━
+🆔 Buyurtma: <b>${shortId}</b>
+📞 <b>Telefon:</b> ${tel}
+${locationText}
+━━━━━━━━━━━━━━━━━━━━━
+🍽 <b>Taomlar:</b>
+${itemsText}
+━━━━━━━━━━━━━━━━━━━━━
+💰 <b>JAMI: ${jami.toLocaleString()} so'm</b>
+━━━━━━━━━━━━━━━━━━━━━
+👉 Admin panelda kuryer tayinlang`;
+
+    // Send to admin
+    await sendTelegram(ADMIN_ID, msg);
 
     // Reset
     document.getElementById('order-tel').value    = '';
@@ -380,7 +439,7 @@ window.sendOrder = function() {
     window.cart = [];
     window.updateCart();
     window.closeOrderModal();
-    // Close cart panel too
+
     const panel    = document.getElementById('cartPanel');
     const backdrop = document.getElementById('cart-backdrop');
     if (panel?.classList.contains('active')) {
@@ -389,6 +448,161 @@ window.sendOrder = function() {
         document.body.style.overflow = '';
     }
     toast("🎉 Buyurtmangiz qabul qilindi! Tez orada bog'lanamiz.");
+};
+
+/* ══════════════════════════════════════════
+   SITE ADMIN ORDERS PANEL (real-time)
+══════════════════════════════════════════ */
+window.allOrders = {};
+
+function statusLabel(s) {
+    const map = {
+        yangi:      { text: '🆕 Yangi',       cls: 'st-new' },
+        tayinlandi: { text: '🚴 Tayinlandi',   cls: 'st-assigned' },
+        yetkazildi: { text: '✅ Yetkazildi',   cls: 'st-done' },
+        bekor:      { text: '❌ Bekor',        cls: 'st-cancel' }
+    };
+    return map[s] || { text: s, cls: '' };
+}
+
+function renderSiteOrders() {
+    const container = document.getElementById('site-orders-list');
+    if (!container) return;
+
+    const orders = Object.entries(window.allOrders || {})
+        .map(([k, v]) => ({ _key: k, ...v }))
+        .sort((a, b) => b.createdAt - a.createdAt);
+
+    if (orders.length === 0) {
+        container.innerHTML = `<div class="so-empty"><i class="fas fa-inbox"></i><span>Hozircha buyurtmalar yo'q</span></div>`;
+        return;
+    }
+
+    container.innerHTML = orders.map(o => {
+        const items = JSON.parse(o.items || '[]');
+        const st    = statusLabel(o.status);
+        const loc   = o.isGPS && o.mapLink
+            ? `<a href="${o.mapLink}" target="_blank" class="so-map-link"><i class="fas fa-map-marker-alt"></i> Xaritada ko'rish</a>`
+            : `<span class="so-addr"><i class="fas fa-map-marker-alt"></i> ${o.manzil}</span>`;
+        const time = new Date(o.createdAt).toLocaleString('uz-UZ');
+        const courierName = o.courier === 'kuryer1' ? '🧑 Kuryer 1' : o.courier === 'kuryer2' ? '🧑 Kuryer 2' : '—';
+
+        return `
+        <div class="so-card" data-key="${o._key}" data-status="${o.status}">
+            <div class="so-card-head">
+                <div class="so-id-info">
+                    <span class="so-id">${o.shortId || ('#' + String(o.id).slice(-5))}</span>
+                    <span class="so-time">${time}</span>
+                </div>
+                <span class="so-status ${st.cls}">${st.text}</span>
+            </div>
+            <div class="so-card-body">
+                <div class="so-row"><i class="fas fa-phone-alt"></i><span>${o.tel}</span></div>
+                <div class="so-row">${loc}</div>
+                <div class="so-items">
+                    ${items.map(i => `<span class="so-item">${i.name} ×${i.qty}</span>`).join('')}
+                </div>
+                <div class="so-total"><i class="fas fa-coins"></i> ${Number(o.total).toLocaleString()} so'm</div>
+            </div>
+            <div class="so-card-foot">
+                <div class="so-courier-info">
+                    <span class="so-clbl">Kuryer:</span>
+                    <span class="so-cval">${courierName}</span>
+                </div>
+                ${o.status === 'yangi' || o.status === 'tayinlandi' ? `
+                <div class="so-actions">
+                    <button class="so-btn so-k1 ${o.courier==='kuryer1'?'active':''}" onclick="assignCourier('${o._key}','kuryer1')">
+                        <i class="fas fa-motorcycle"></i> Kuryer 1
+                    </button>
+                    <button class="so-btn so-k2 ${o.courier==='kuryer2'?'active':''}" onclick="assignCourier('${o._key}','kuryer2')">
+                        <i class="fas fa-motorcycle"></i> Kuryer 2
+                    </button>
+                    <button class="so-btn so-done" onclick="markDone('${o._key}')">
+                        <i class="fas fa-check"></i> Yetkazildi
+                    </button>
+                    <button class="so-btn so-cancel" onclick="cancelOrder('${o._key}')">
+                        <i class="fas fa-times"></i> Bekor
+                    </button>
+                </div>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+
+    // update badge
+    const newCount = orders.filter(o => o.status === 'yangi').length;
+    const badge = document.getElementById('site-orders-badge');
+    if (badge) {
+        badge.textContent = newCount;
+        badge.style.display = newCount > 0 ? 'flex' : 'none';
+    }
+}
+
+window.assignCourier = async function(key, courier) {
+    const order = window.allOrders[key];
+    if (!order) return;
+
+    await update(ref(db, 'orders/' + key), {
+        courier,
+        status: 'tayinlandi'
+    });
+
+    // Send Telegram to courier
+    const items = JSON.parse(order.items || '[]');
+    const itemsText = items.map(i => `• ${i.name} × ${i.qty} = ${(i.price * i.qty).toLocaleString()} so'm`).join('\n');
+    const locationText = order.isGPS && order.mapLink
+        ? `📍 <b>Lokatsiya (GPS):</b> <a href="${order.mapLink}">Xaritada ko'rish</a>`
+        : `📍 <b>Manzil:</b> ${order.manzil}`;
+
+    const courierName = courier === 'kuryer1' ? 'Kuryer 1' : 'Kuryer 2';
+    const courierId   = courier === 'kuryer1' ? KURYER1_ID : KURYER2_ID;
+
+    const courierMsg =
+`🚴 <b>YANGI BUYURTMA SIZGA TAYINLANDI!</b>
+━━━━━━━━━━━━━━━━━━━━━
+🆔 Buyurtma: <b>${order.shortId || ('#' + String(order.id).slice(-5))}</b>
+📞 <b>Mijoz:</b> ${order.tel}
+${locationText}
+━━━━━━━━━━━━━━━━━━━━━
+🍽 <b>Taomlar:</b>
+${itemsText}
+━━━━━━━━━━━━━━━━━━━━━
+💰 <b>JAMI: ${Number(order.total).toLocaleString()} so'm</b>
+━━━━━━━━━━━━━━━━━━━━━
+✅ Yetkazib bering!`;
+
+    await sendTelegram(courierId, courierMsg);
+
+    // Notify admin
+    const adminMsg = `✅ <b>${order.shortId || ('#'+String(order.id).slice(-5))}</b> buyurtma <b>${courierName}</b>ga tayinlandi.`;
+    await sendTelegram(ADMIN_ID, adminMsg);
+
+    toast(`✅ Buyurtma ${courierName}ga tayinlandi va xabar yuborildi!`);
+};
+
+window.markDone = async function(key) {
+    await update(ref(db, 'orders/' + key), { status: 'yetkazildi' });
+    const order = window.allOrders[key];
+    if (order) {
+        const courierId = order.courier === 'kuryer1' ? KURYER1_ID : KURYER2_ID;
+        await sendTelegram(courierId,
+            `✅ <b>${order.shortId||('#'+String(order.id).slice(-5))}</b> buyurtma yetkazildi deb belgilandi.`);
+    }
+    toast("✅ Buyurtma yetkazildi deb belgilandi.");
+};
+
+window.cancelOrder = async function(key) {
+    if (!confirm("Buyurtmani bekor qilmoqchimisiz?")) return;
+    await update(ref(db, 'orders/' + key), { status: 'bekor' });
+    toast("❌ Buyurtma bekor qilindi.");
+};
+
+/* ══════════════════════════════════════════
+   SITE ORDERS PANEL TOGGLE
+══════════════════════════════════════════ */
+window.toggleSiteOrders = function() {
+    const panel = document.getElementById('site-orders-panel');
+    if (!panel) return;
+    panel.classList.toggle('open');
 };
 
 /* ══════════════════════════════════════════
@@ -401,18 +615,16 @@ window.filterItems = function() {
 };
 
 /* ══════════════════════════════════════════
-   ADMIN
+   ADMIN / COURIER REDIRECT (3-CLICKS)
 ══════════════════════════════════════════ */
 window.handleAdmin = function() {
     adminClicks++;
     if (adminClicks === 3) {
-        const pw = prompt("🔐 Admin parolini kiriting:");
+        const pw = prompt("🔐 Maxfiy parolni kiriting:");
         if (pw === "7777") {
-            window.isAdmin = true;
-            document.getElementById('admin-box').style.display = 'block';
-            initAdminDrag();
-            window.renderMenu();
-            toast("✅ Admin panelga kirdingiz.");
+            window.location.href = "admin.html";
+        } else if (pw === "1111" || pw === "2222") {
+            window.location.href = "courier.html";
         } else if (pw !== null) {
             toast("❌ Noto'g'ri parol!", 'warn');
         }
@@ -464,7 +676,6 @@ window.removeProduct = function(fKey) {
     }
 };
 
-/* ── Admin panel drag (mouse + touch) ── */
 function initAdminDrag() {
     const box    = document.getElementById('admin-box');
     const header = document.getElementById('admin-drag-header');
@@ -493,7 +704,6 @@ function initAdminDrag() {
 
     header.addEventListener('mousedown',  e => { start(e.clientX, e.clientY); e.preventDefault(); });
     header.addEventListener('touchstart', e => { start(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
-
     document.addEventListener('mousemove',  e => move(e.clientX, e.clientY));
     document.addEventListener('touchmove',  e => move(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
     document.addEventListener('mouseup',  end);
@@ -532,7 +742,7 @@ window.sendContactMsg = function() {
 /* ══════════════════════════════════════════
    TOAST
 ══════════════════════════════════════════ */
-function toast(msg, type = 'ok') {
+window.toast = function(msg, type = 'ok') {
     const el = document.getElementById('toast');
     if (!el) return;
     el.textContent = msg;
@@ -542,10 +752,10 @@ function toast(msg, type = 'ok') {
     el.classList.add('show');
     clearTimeout(el._t);
     el._t = setTimeout(() => el.classList.remove('show'), 3000);
-}
+};
 
 /* ══════════════════════════════════════════
-   KEYBOARD SHORTCUTS
+   KEYBOARD
 ══════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
