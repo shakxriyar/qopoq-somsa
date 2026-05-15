@@ -245,15 +245,106 @@ window.toggleCart = function() {
 };
 
 /* ══════════════════════════════════════════
-   CHECKOUT
+   CHECKOUT — MODAL FLOW
 ══════════════════════════════════════════ */
+
+// Open the order modal (called from cart panel button)
 window.checkout = function() {
     if (window.cart.length === 0) { toast("⚠️ Savat bo'sh!", 'warn'); return; }
+    orderShowStep(1);
+    document.getElementById('orderOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+};
 
-    const tel    = prompt("📞 Telefon raqamingiz (masalan: +998 90 123 45 67):");
-    if (!tel) return;
-    const manzil = prompt("📍 Yetkazib berish manzilingiz:");
-    if (!manzil) return;
+window.closeOrderModal = function() {
+    document.getElementById('orderOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+};
+
+window.orderOverlayClose = function(e) {
+    if (e.target.id === 'orderOverlay') window.closeOrderModal();
+};
+
+function orderShowStep(n) {
+    [1, 2, 3].forEach(i => {
+        const s = document.getElementById('ostep-' + i);
+        const d = document.getElementById('odot-' + i);
+        if (!s || !d) return;
+        s.classList.toggle('hidden', i !== n);
+        d.classList.remove('active', 'done');
+        if (i === n)     d.classList.add('active');
+        if (i < n)       d.classList.add('done');
+    });
+}
+
+window.orderGoBack = function(fromStep) {
+    orderShowStep(fromStep - 1);
+};
+
+window.formatTelInput = function(el) {
+    // Keep only digits and + sign
+    let v = el.value.replace(/[^\d+]/g, '');
+    if (v.length > 0 && v[0] !== '+') v = '+' + v;
+    el.value = v;
+};
+
+window.orderStep1Next = function() {
+    const tel = document.getElementById('order-tel').value.trim();
+    if (tel.length < 7) {
+        toast("⚠️ To'g'ri telefon raqam kiriting!", 'warn');
+        document.getElementById('order-tel').focus();
+        return;
+    }
+    orderShowStep(2);
+    setTimeout(() => document.getElementById('order-manzil').focus(), 100);
+};
+
+window.orderStep2Next = function() {
+    const manzil = document.getElementById('order-manzil').value.trim();
+    if (!manzil) {
+        toast("⚠️ Manzilni kiriting!", 'warn');
+        document.getElementById('order-manzil').focus();
+        return;
+    }
+    // populate confirm step
+    const tel   = document.getElementById('order-tel').value.trim();
+    let jami = 0;
+    window.cart.forEach(i => { jami += i.price * i.qty; });
+
+    document.getElementById('ocr-tel').textContent    = tel;
+    document.getElementById('ocr-manzil').textContent = manzil;
+    document.getElementById('ocr-total').textContent  = jami.toLocaleString() + " so'm";
+    orderShowStep(3);
+};
+
+window.getGPS = function() {
+    if (!navigator.geolocation) {
+        toast("⚠️ GPS qurilmangizda qo'llab-quvvatlanmaydi.", 'warn');
+        return;
+    }
+    const btn = document.querySelector('.order-gps-btn');
+    if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aniqlanmoqda...'; }
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lng = pos.coords.longitude.toFixed(6);
+            document.getElementById('order-manzil').value = `${lat}, ${lng}`;
+            if (btn) { btn.innerHTML = '<i class="fas fa-check"></i> GPS manzil olindi'; }
+            setTimeout(() => {
+                if (btn) btn.innerHTML = '<i class="fas fa-crosshairs"></i> GPS lokatsiyani olish';
+            }, 2500);
+        },
+        () => {
+            toast("⚠️ GPS aniqlab bo'lmadi, qo'lda kiriting.", 'warn');
+            if (btn) btn.innerHTML = '<i class="fas fa-crosshairs"></i> GPS lokatsiyani olish';
+        }
+    );
+};
+
+window.sendOrder = function() {
+    const tel    = document.getElementById('order-tel').value.trim();
+    const manzil = document.getElementById('order-manzil').value.trim();
 
     let msg  = `🥟 YANGI BUYURTMA — QOPOQ SOMSA\n`;
     msg     += `━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -266,7 +357,6 @@ window.checkout = function() {
         msg  += `• ${i.name} × ${i.qty} = ${(i.price * i.qty).toLocaleString()} so'm\n`;
         jami += i.price * i.qty;
 
-        // increment popularity counter
         const pRef = ref(db, 'popularity/' + i.id);
         get(pRef).then(snap => {
             set(pRef, (snap.val() || 0) + i.qty);
@@ -284,9 +374,20 @@ window.checkout = function() {
         });
     });
 
+    // Reset
+    document.getElementById('order-tel').value    = '';
+    document.getElementById('order-manzil').value = '';
     window.cart = [];
     window.updateCart();
-    window.toggleCart();
+    window.closeOrderModal();
+    // Close cart panel too
+    const panel    = document.getElementById('cartPanel');
+    const backdrop = document.getElementById('cart-backdrop');
+    if (panel?.classList.contains('active')) {
+        panel.classList.remove('active');
+        backdrop?.classList.remove('open');
+        document.body.style.overflow = '';
+    }
     toast("🎉 Buyurtmangiz qabul qilindi! Tez orada bog'lanamiz.");
 };
 
@@ -448,7 +549,9 @@ function toast(msg, type = 'ok') {
 ══════════════════════════════════════════ */
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
-        if (document.getElementById('productModal')?.classList.contains('open')) {
+        if (document.getElementById('orderOverlay')?.classList.contains('open')) {
+            window.closeOrderModal();
+        } else if (document.getElementById('productModal')?.classList.contains('open')) {
             closeModal();
         } else if (document.getElementById('cartPanel')?.classList.contains('active')) {
             window.toggleCart();
