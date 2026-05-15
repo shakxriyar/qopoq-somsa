@@ -735,6 +735,197 @@ body::after {
 
 
 /* ═══════════════════════════════════════════════
+   ORDER MODAL — 2-step checkout sheet
+═══════════════════════════════════════════════ */
+.order-overlay {
+    position: fixed; inset: 0; z-index: 5000;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none;
+    transition: opacity .35s var(--ease);
+}
+.order-overlay.open {
+    opacity: 1; pointer-events: all;
+}
+
+.order-sheet {
+    position: relative;
+    width: 100%; max-width: 520px;
+    background: #0e141e;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    padding: 14px 28px 38px;
+    transform: translateY(100%);
+    transition: transform .45s var(--spring);
+    box-shadow: 0 -24px 80px rgba(0,0,0,.7), 0 -4px 30px var(--gold-glow);
+}
+.order-overlay.open .order-sheet {
+    transform: translateY(0);
+}
+
+/* Progress dots */
+.order-progress {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 18px; padding-top: 4px;
+}
+.order-dot {
+    width: 32px; height: 4px; border-radius: 3px;
+    background: rgba(200,164,90,.2);
+    transition: background .35s var(--ease), width .35s var(--ease);
+}
+.order-dot.active {
+    background: var(--gold);
+    width: 42px;
+}
+.order-dot.done {
+    background: var(--gold-dk);
+}
+
+/* Close button */
+.order-x {
+    position: absolute; top: 16px; right: 18px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.07); border: 1px solid var(--border);
+    color: var(--muted); font-size: .9rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .3s var(--ease);
+}
+.order-x:hover { background: rgba(200,164,90,.18); color: var(--gold); border-color: var(--gold); }
+
+/* Step */
+.order-step { display: flex; flex-direction: column; gap: 14px; }
+.order-step.hidden { display: none; }
+
+.order-icon-title {
+    display: flex; align-items: center; gap: 14px; margin-bottom: 4px;
+}
+.order-icon-wrap {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: rgba(200,164,90,.12);
+    border: 1px solid rgba(200,164,90,.22);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold); font-size: 1rem;
+    flex-shrink: 0;
+}
+.order-icon-check { background: rgba(52,199,89,.12); border-color: rgba(52,199,89,.28); color: #34c759; }
+
+.order-step-title {
+    font-family: var(--ff-d); font-size: 1.45rem; font-weight: 700;
+    color: var(--gold); letter-spacing: 1px;
+}
+
+.order-label {
+    font-size: .72rem; color: var(--muted);
+    letter-spacing: 2px; text-transform: uppercase; font-weight: 600;
+    margin-top: 2px;
+}
+
+.order-input {
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    color: var(--text); padding: 14px 16px;
+    border-radius: var(--r-sm); outline: none;
+    font-family: var(--ff-b); font-size: .96rem; width: 100%;
+    transition: all .35s var(--ease);
+    letter-spacing: .5px;
+}
+.order-input:focus {
+    border-color: var(--gold);
+    background: rgba(200,164,90,.05);
+    box-shadow: 0 0 0 3px rgba(200,164,90,.1);
+}
+.order-input::placeholder { color: var(--muted); font-size: .84rem; }
+
+/* GPS btn */
+.order-gps-btn {
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    color: var(--muted); padding: 13px 16px;
+    border-radius: var(--r-sm); font-family: var(--ff-b); font-size: .85rem;
+    display: flex; align-items: center; gap: 10px;
+    transition: all .3s var(--ease); width: 100%;
+}
+.order-gps-btn i { color: var(--gold); }
+.order-gps-btn:hover {
+    border-color: var(--gold-dk); color: var(--text);
+    background: rgba(200,164,90,.07);
+}
+
+/* Next / CTA button */
+.order-next-btn {
+    background: var(--grad);
+    color: #05070b; font-weight: 700;
+    padding: 15px 20px; border-radius: var(--r-sm);
+    font-family: var(--ff-d); font-size: 1.05rem; letter-spacing: 1.5px;
+    border: none; width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    transition: all .3s var(--ease);
+    box-shadow: 0 8px 24px rgba(200,164,90,.2);
+    margin-top: 4px;
+}
+.order-next-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(200,164,90,.32);
+    filter: brightness(1.08);
+}
+.order-next-btn:active { transform: translateY(0); }
+
+.order-send-btn {
+    background: linear-gradient(135deg, #34c759 0%, #28a745 100%);
+    box-shadow: 0 8px 24px rgba(52,199,89,.2);
+}
+.order-send-btn:hover { box-shadow: 0 14px 34px rgba(52,199,89,.3); }
+
+/* Back button */
+.order-back-btn {
+    background: none; border: none;
+    color: var(--muted); font-family: var(--ff-b); font-size: .85rem;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px; width: 100%;
+    transition: color .3s var(--ease);
+    letter-spacing: 1px;
+}
+.order-back-btn:hover { color: var(--text); }
+
+/* Confirm step rows */
+.order-confirm-rows {
+    background: rgba(255,255,255,.04);
+    border: 1px solid var(--border);
+    border-radius: var(--r-sm);
+    overflow: hidden;
+}
+.order-confirm-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+}
+.order-confirm-row:last-child { border-bottom: none; }
+.order-confirm-total { padding: 16px 18px; }
+
+.ocr-label {
+    font-size: .72rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 2px; font-weight: 600;
+    display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    flex-shrink: 0;
+}
+.ocr-label i { color: var(--gold); }
+.ocr-val {
+    font-size: .9rem; color: var(--text); text-align: right; line-height: 1.4;
+}
+.ocr-gold {
+    font-family: var(--ff-d); font-size: 1.15rem;
+    color: var(--gold); font-weight: 700; letter-spacing: 1px;
+}
+
+@media (max-width: 768px) {
+    .order-sheet { padding: 12px 18px 32px; }
+    .order-step-title { font-size: 1.2rem; }
+}
+
+
+/* ═══════════════════════════════════════════════
    ANIMATIONS
 ═══════════════════════════════════════════════ */
 @keyframes fadeUp {
