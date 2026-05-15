@@ -1006,3 +1006,56 @@ body::after {
     .button { padding: 8px; font-size: .6rem; }
     .hero-title { font-size: 3.4rem; }
 }
+/* ═══════════════════════════════════════════════
+   ORDERS TRACKING BUTTON (navbar)
+═══════════════════════════════════════════════ */
+.orders-track-btn {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(200,164,90,.1);
+    border: 1px solid var(--border);
+    color: var(--gold);
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-family: var(--ff-b);
+    font-size: .8rem;
+    font-weight: 500;
+    text-decoration: none;
+    letter-spacing: .5px;
+    transition: all .3s var(--ease);
+    white-space: nowrap;
+}
+.orders-track-btn:hover {
+    background: rgba(200,164,90,.2);
+    border-color: var(--border-h);
+    transform: translateY(-1px);
+}
+.orders-track-btn i { font-size: .85rem; }
+
+@media (max-width: 520px) {
+    .orders-track-label { display: none; }
+    .orders-track-btn { padding: 9px 11px; border-radius: 50%; }
+}
+
+/* ═══════════════════════════════════════════════
+   ORDER CONFIRM HINT
+═══════════════════════════════════════════════ */
+.orders-track-hint {
+    background: rgba(200,164,90,.07);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: .8rem;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 9px;
+    margin-bottom: 4px;
+}
+.orders-track-hint i { color: var(--gold); flex-shrink: 0; }
+.orders-track-hint a { color: var(--gold); text-decoration: none; font-weight: 600; }
+.orders-track-hint a:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════
+   PHONE INPUT — always start with +998
+═══════════════════════════════════════════════ */
+#order-tel {
+    letter-spacing: .5px;
+}
